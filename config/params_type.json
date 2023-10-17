@@ -1,0 +1,64 @@
+{
+    "num_den_layers_pre":{
+        "range": [0, 5],
+        "type": "int"
+    },
+    "num_units_den_layers_pre":{
+       "range": [1, 60],
+       "type": "int",
+       "depends_on": "num_den_layers_pre"
+    },
+    "dropout_rate_den_layers_pre":{
+        "range" : 0,
+        "type": "float"
+    },
+    "num_den_layers_post":{
+        "range" : [0, 20],
+        "type": "int"
+    },
+    "num_units_den_layers_post":{
+        "range" : [1, 60],
+        "type": "int",
+        "depends_on": "num_den_layers_post"
+    },
+    "dropout_rate_den_layers_post":{
+        "range" : 0,
+        "type": "float"
+    },
+    "num_rnn_layers":{
+        "range" : [1, 10],
+        "type": "int"
+    },
+    "num_units_rnn_layer":{
+        "range" : [1, 200],
+        "type": "int"
+    },
+    "activation_dense_pre":{
+        "range" : "sigmoid",
+        "type": "list"
+    },
+    "rnn_type":{
+        "range" : "LSTM",
+        "type": "list"
+    },
+    "activation_dense_post":{
+        "range" : "sigmoid",
+        "type": "list"
+    },
+    "dropout_rate_rnn":{
+        "range": 0,
+        "type": "float"
+    },
+    "learning_rate_exp":{
+        "range" : [-4, -2],
+        "type": "float"
+    },
+    "optimizers":{
+        "range" : "Adam",
+        "type": "list"
+    },
+     "batch_size":{
+        "range" : 100,
+        "type": "int"
+    }
+}
