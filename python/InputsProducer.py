@@ -36,47 +36,44 @@ def FindFiles(path, pattern) :
 def DefineVariables(sample_name, parity, use_deepTau_ordering) :
     global initialized
     if not initialized:
-        ROOT.gInterpreter.Declare('#include "../include/AnaPyInterface.h"')
+        ROOT.gInterpreter.Declare('#include "../include/pyInterface.h"')
         initialized = True
 
-    df = ROOT.ROOT.RDataFrame('all_events', sample_name)
+    df = ROOT.ROOT.RDataFrame('Event', sample_name)
 
     if parity >= 0 and parity <= 1:
-        df = df.Filter('evt % 2 == {}'.format(parity))
+        df = df.Filter('event % 2 == {}'.format(parity))
 
-    df =  df.Define('deepFlavour_bVSall', 'MakeDeepFlavour_bVSall(jets_deepFlavour_b, jets_deepFlavour_bb, jets_deepFlavour_lepb)')
-
-    if use_deepTau_ordering :
-        df = df.Define('tau_indices_sel', 'getSignalTauIndicesDeep_Tau(lep_p4, byDeepTau2017v2p1VSjetraw, byDeepTau2017v2p1VSeraw, byDeepTau2017v2p1VSmuraw, lep_type, channelId)')
-
-    else:
-        df = df.Define('tau_indices_sel', 'getSignalTauIndices_Gen(lep_p4, lep_genTauIndex)') \
-
-    df = df.Filter('tau_indices_sel.size() == 2') \
-           .Define('jets_deepFlavourOrderedIndex', 'CreateOrderedIndex(jets_p4, deepFlavour_bVSall, true, tau_indices_sel, lep_p4, {})'.format(max_jet)) \
-           .Define('n_jets', 'jets_deepFlavourOrderedIndex.size()') \
-           .Define('htt_scalar_pt', 'getHTTScalarPt(lep_p4, tau_indices_sel)') \
-           .Define('htt_p4', 'getHTTp4(lep_p4, tau_indices_sel)') \
+    df = df.Define('spin', '0') \
+           .Define('mass_point', '125') \
+           .Define('sample_type', 'ToLegacySampleType(sample)') \
+           .Define('node', 'node_index') \
+           .Define('channelId', 'channel')
+    df = df.Define('sample_year', '2018')
+    df = df.Define('n_jets', 'RecoJet_pt.size()') \
+           .Define('htt_scalar_pt', 'HttCandidate_leg0_pt + HttCandidate_leg1_pt') \
+           .Define('htt_p4', 'getHTTp4(HttCandidate_leg0_pt, HttCandidate_leg0_eta, HttCandidate_leg0_phi, HttCandidate_leg0_mass,HttCandidate_leg1_pt, HttCandidate_leg1_eta, HttCandidate_leg1_phi, HttCandidate_leg1_mass)') \
            .Define('htt_pt', 'htt_p4.pt()') \
            .Define('htt_eta', 'htt_p4.eta()') \
-           .Define('rel_met_pt_htt_pt', 'pfMET_p4.pt() / htt_scalar_pt') \
-           .Define('htt_met_dphi', 'ROOT::Math::VectorUtil::DeltaPhi(htt_p4, pfMET_p4)') \
-           .Define('jets_genbJet', 'MakeGenbJet(jets_genJetIndex, jets_deepFlavourOrderedIndex)') \
-           .Filter('std::accumulate(jets_genbJet.begin(), jets_genbJet.end(), 0) == 2')
+           .Define('rel_met_pt_htt_pt', 'MET_pt / htt_pt') \
+           .Define('htt_met_dphi', 'htt_p4.phi()- MET_phi') \
+           # .Define('jets_genbJet', 'MakeGenbJet(jets_genJetIndex, jets_deepFlavourOrderedIndex)') \
+           # .Filter('std::accumulate(jets_genbJet.begin(), jets_genbJet.end(), 0) == 2')
 
-    for n_jet in range(max_jet):
-        df = df.Define('jet_{}_valid'.format(n_jet), 'static_cast<float>({} < jets_deepFlavourOrderedIndex.size())'.format(n_jet)) \
-               .Define('jet_{}_pt'.format(n_jet), 'jet_p4_pt(jets_deepFlavourOrderedIndex, jets_p4, {})'.format(n_jet)) \
-               .Define('jet_{}_eta'.format(n_jet), 'jet_p4_eta(jets_deepFlavourOrderedIndex, jets_p4, {})'.format(n_jet)) \
-               .Define('jet_{}_E'.format(n_jet), 'jet_p4_E(jets_deepFlavourOrderedIndex, jets_p4, {})'.format(n_jet)) \
-               .Define('jet_{}_M'.format(n_jet), 'jet_p4_M(jets_deepFlavourOrderedIndex, jets_p4, {})'.format(n_jet)) \
-               .Define('rel_jet_{}_M_pt'.format(n_jet), 'rel_jet_M_pt(jets_deepFlavourOrderedIndex, jets_p4, {})'.format(n_jet)) \
-               .Define('rel_jet_{}_E_pt'.format(n_jet), 'rel_jet_E_pt(jets_deepFlavourOrderedIndex, jets_p4, {})'.format(n_jet)) \
-               .Define('jet_{}_genbJet'.format(n_jet), 'jet_genbJet(jets_genJetIndex, jets_deepFlavourOrderedIndex, {}, jets_p4)'.format(n_jet)) \
-               .Define('jet_{}_deepFlavour'.format(n_jet), 'jets_deepFlavour(deepFlavour_bVSall, jets_deepFlavourOrderedIndex, {})'.format(n_jet)) \
-               .Define('jet_{}_deepCSV'.format(n_jet), 'jets_deepCSV(jets_deepCsv_BvsAll, jets_deepFlavourOrderedIndex, {})'.format(n_jet)) \
-               .Define('jet_{}_htt_dphi'.format(n_jet), 'httDeltaPhi_jet(htt_p4, jets_deepFlavourOrderedIndex, jets_p4, {})'.format(n_jet)) \
-               .Define('jet_{}_htt_deta'.format(n_jet), 'httDeltaEta_jet(htt_p4, jets_deepFlavourOrderedIndex, jets_p4, {})'.format(n_jet))
+    for jet_idx in range(max_jet):
+        df = df.Define(f'jet_{jet_idx}_valid', f'static_cast<float>({jet_idx}) < RecoJet_pt.size()') \
+               .Define(f'jet_{jet_idx}_p4', f'jet_{jet_idx}_valid ? LorentzVectorM(RecoJet_pt.at({jet_idx}), RecoJet_eta.at({jet_idx}), RecoJet_phi.at({jet_idx}), RecoJet_mass.at({jet_idx})) : LorentzVectorM()') \
+               .Define(f'jet_{jet_idx}_pt', f'jet_{jet_idx}_valid ? jet_{jet_idx}_p4.pt() : 0.f') \
+               .Define(f'jet_{jet_idx}_eta', f'jet_{jet_idx}_valid ? jet_{jet_idx}_p4.eta() : 0.f') \
+               .Define(f'jet_{jet_idx}_E', f'jet_{jet_idx}_valid ? jet_{jet_idx}_p4.E() : 0.f') \
+               .Define(f'jet_{jet_idx}_M', f'jet_{jet_idx}_valid ? jet_{jet_idx}_p4.M() : 0.f') \
+               .Define(f'rel_jet_{jet_idx}_M_pt', f'jet_{jet_idx}_valid ? jet_{jet_idx}_p4.M() / jet_{jet_idx}_p4.pt() : 0.f') \
+               .Define(f'rel_jet_{jet_idx}_E_pt', f'jet_{jet_idx}_valid ? jet_{jet_idx}_p4.E() / jet_{jet_idx}_p4.pt() : 0.f') \
+               .Define(f'jet_{jet_idx}_genbJet', f'jet_{jet_idx}_valid ? RecoJet_genMatched.at({jet_idx}) : 0.f') \
+               .Define(f'jet_{jet_idx}_deepFlavour', f'jet_{jet_idx}_valid ? RecoJet_btagDeepFlavB.at({jet_idx}) : 0.f') \
+               .Define(f'jet_{jet_idx}_htt_dphi', f'jet_{jet_idx}_valid ? ROOT::Math::VectorUtil::DeltaPhi(htt_p4, jet_{jet_idx}_p4) : 0.f') \
+               .Define(f'jet_{jet_idx}_htt_deta', f'jet_{jet_idx}_valid ? (htt_p4.eta()-jet_{jet_idx}_p4.eta()) : 0.f')
+                # .Define(f'jet_{jet_idx}_deepCSV'.format(n_jet), 'jets_deepCSV(jets_deepCsv_BvsAll, jets_deepFlavourOrderedIndex, {})'.format(n_jet)) \
 
     return df
 
@@ -86,18 +83,18 @@ def CreateColums() :
     ]
 
     jet_column = [ 'jet_{}_valid', 'jet_{}_pt', 'jet_{}_eta', 'jet_{}_E', 'jet_{}_M', 'rel_jet_{}_M_pt', 'rel_jet_{}_E_pt',
-                   'jet_{}_htt_deta', 'jet_{}_deepFlavour', 'jet_{}_htt_dphi', 'jet_{}_genbJet', 'jet_{}_deepCSV'
+                   'jet_{}_htt_deta', 'jet_{}_deepFlavour', 'jet_{}_htt_dphi', 'jet_{}_genbJet', 
     ]
 
     all_vars = evt_columns + jet_column
-    jet_columns = [] 
-
+    jet_columns = []
+    
     for jet_var in jet_column :
         for n in range(10) :
             jet_columns.append(jet_var.format(n))
 
     return evt_columns, jet_column, all_vars, jet_columns
-    
+
 
 def GetIndex(x) :
     evt_columns, jet_column, all_vars, jet_columns = CreateColums()

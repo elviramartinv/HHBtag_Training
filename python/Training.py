@@ -1,6 +1,9 @@
 # Definition of the training for the HH-btag NN
 # This file is part of https://github.com/hh-italian-group/hh-bbtautau.
 
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+
 import tensorflow as tf
 gpus = tf.config.experimental.list_physical_devices('GPU')
 #print(gpus)
@@ -22,7 +25,7 @@ from keras.callbacks import Callback
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-params", "--params")
-parser.add_argument("-output", "--output")
+parser.add_argument("-output", "--output", required=True)
 parser.add_argument("-training_variables", "--training_variables")
 parser.add_argument("-n_epoch", "--n_epoch", type=int)
 parser.add_argument("-patience", "--patience", type=int)
@@ -55,7 +58,7 @@ def PerformTraining(file_name, n_epoch, params):
     data = InputsProducer.CreateRootDF(file_name, 0, True, False)
     X, Y, Z, var_pos, var_pos_z, var_name = InputsProducer.CreateXY(data, args.training_variables)
     print(var_pos)
-    w = CreateSampleWeigts(X, Z)
+    #w = CreateSampleWeigts(X, Z)
     Y = Y.reshape(Y.shape[0:2])
     tf.random.set_seed(args.seed)
 
@@ -68,17 +71,24 @@ def PerformTraining(file_name, n_epoch, params):
 
     model.build(X.shape)
     model.summary()
+    #print(Y[0, :])
+    #print(w)
+    #raise RuntimeError('stop')
+
+    if os.path.exists(args.output):
+       raise RuntimeError(f'Output {args.output} already exists')
+    os.makedirs(args.output)
 
     early_stop = tf.keras.callbacks.EarlyStopping(monitor='val_sel_acc_2', mode='max', patience=args.patience)
-    csv_logger = CSVLogger('{}_par{}_training_history.csv'.format(args.output, args.parity), append=False, separator=',')
-    save_best_only =  tf.keras.callbacks.ModelCheckpoint(filepath='{}_par{}_best_weights.tf'.format(args.output, args.parity),
-    #save_best_only =  tf.keras.callbacks.ModelCheckpoint(filepath='{}_par{}_best_weights.h5'.format(args.output, args.parity),
-                                                         monitor='val_sel_acc_2',  mode='max', save_best_only=True, verbose=1)
+    csv_logger = CSVLogger(os.path.join(args.output, 'history.csv'), append=False, separator=',')
+    
+    save_best_only =  tf.keras.callbacks.ModelCheckpoint(filepath=os.path.join(args.output, 'model'),
+                                                         monitor='val_sel_acc_2',  mode='max', save_best_only=True, save_weights_only=False, verbose=1)
 
-    model.fit(X, Y, sample_weight=w, validation_split=args.validation_split, epochs=args.n_epoch, batch_size=params['batch_size'],
-              callbacks=[csv_logger, save_best_only, early_stop, WeightsSaver(1)],verbose=2)
+    model.fit(X, Y, validation_split=args.validation_split, epochs=args.n_epoch, batch_size=params['batch_size'],
+              callbacks=[csv_logger, save_best_only, early_stop],verbose=1)
 
-    model.save_weights('{}_par{}_final_weights.tf'.format(args.output, args.parity))
+    #model.save_weights('{}_par{}_final_weights.tf'.format(args.output, args.parity))
     #model.save_weights('{}_par{}_final_weights.h5'.format(args.output, args.parity))
 
 with open('{}_par{}_params.json'.format(args.output, args.parity), 'w') as f:
