@@ -42,9 +42,9 @@ def DefineVariables(sample_name, parity, use_deepTau_ordering) :
     df = ROOT.ROOT.RDataFrame('Event', sample_name)
 
     if parity >= 0 and parity <= 1:
-        df = df.Filter('event % 2 == {}'.format(parity))
+        df = df.Filter(f'event % 2 == {parity}')
 
-    df = df.Define('spin', '0') \
+    df = df.Define('spin', '{if (sample == 1 || sample == 3) return 0; else if (sample == 2 || sample == 4) return 2; else return -1; }') \
            .Define('mass_point', '125') \
            .Define('sample_type', 'ToLegacySampleType(sample)') \
            .Define('node', 'node_index') \

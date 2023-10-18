@@ -24,8 +24,8 @@ def calculeteNEvents(X, Z):
         spin = int(Z[n,0, 1] > 0)
         mn = mass_node[n]
         mn_index = np.argmax(mass_node_unique == mn)
-
-        counts[year - 2016, channel, sample_type - 6, spin,  mn_index] +=1
+        channel_idx = channel // 10 - 1
+        counts[year - 2016, channel_idx, sample_type - 6, spin,  mn_index] +=1
     weights = np.where(counts > 0, 1. / counts, 0)
     return counts, weights, mass_node_unique, mass_node
 
@@ -90,45 +90,54 @@ def CreateWeights(X, Z):
     non_res_process = [ggHH_NonRes, VBFHH_NonRes]
     all_process = [res_process, non_res_process]
     for year in range(3):
-        for channel in range(3):
+        for channel_id in [ 13, 23, 33 ]:
+            channel = channel_id // 10 - 1
             for prod_mode in res_process:
                 radion = np.sum(weights[year, channel, prod_mode, 0, :] * counts[year, channel, prod_mode, 0, :])
                 graviton = np.sum(weights[year, channel, prod_mode, 1, :] * counts[year, channel, prod_mode, 1, :])
                 if radion == 0 or graviton == 0: continue
                 C = radion / graviton
+                print(f'CreateWeights: Radion = Graviton year={year} channel={channel} prod_mode={prod_mode} factor={C}')
                 weights[year, channel, prod_mode, 1, :] *= C
 
     # VBF = ggF
     for year in range(3):
-        for channel in range(3):
+        for channel_id in [ 13, 23, 33 ]:
+            channel = channel_id // 10 - 1
             for x in all_process:
                 VBF = np.sum(weights[year, channel, x[1], :, :] * counts[year, channel, x[1], :, :])
                 ggF = np.sum(weights[year, channel,  x[0], :, :] * counts[year, channel,  x[0], :, :])
                 if VBF == 0 or ggF == 0: continue
                 E = VBF / ggF
+                print(f'CreateWeights: VBF = ggF year={year} channel={channel} proc={x} factor={E}')
                 weights[year, channel, x[0], :, :] *= E
 
     # Res = Non Res
     for year in range(3):
-        for channel in range(3):
+        for channel_id in [ 13, 23, 33 ]:
+            channel = channel_id // 10 - 1
             non_res = np.sum(weights[year, channel, non_res_process, :, :] * counts[year, channel, non_res_process, :, :])
             res = np.sum(weights[year, channel, res_process, :, :] * counts[year, channel, res_process, :, :])
             if non_res == 0 or res == 0: continue
             D = non_res / res
+            print(f'CreateWeights: Res = Non Res year={year} channel={channel} factor={D}')
             weights[year, channel, res_process, :, :] *= D
 
     # eTau = muTau = tauTau
     for year in range(3):
         ch_cnt = np.zeros(3)
-        for channel in range(3):
+        for channel_id in [ 13, 23, 33 ]:
+            channel = channel_id // 10 - 1
             ch_cnt[channel] = np.sum(weights[year, channel, :, :, :] * counts[year, channel, :, :, :])
 
         ref_ch = np.amax(ch_cnt)
         if ref_ch == 0: continue
-
-        for channel in range(3):
+        print(f'CreateWeights: ch_cnt =  {ch_cnt}')
+        for channel_id in [ 13, 23, 33 ]:
+            channel = channel_id // 10 - 1
             if ch_cnt[channel] != 0 :
                 A = ref_ch / ch_cnt[channel]
+                print(f'CreateWeights: eTau = muTau = tauTau year={year} channel={channel} factor={A}')
                 weights[year, channel, :, :, :] *= A
 
     # all years
@@ -141,12 +150,13 @@ def CreateWeights(X, Z):
     for year in range(3):
         if year_cnt[year] != 0 :
             A = luminosity[year] / year_cnt[year]
+            print(f'CreateWeights: all years year={year} factor={A}')
             weights[year, :, :, :, :] *= A
 
     #sum all = n_evt
     weights_count = np.sum(weights * counts)
     C =  X.shape[0] / weights_count
-
+    print(f'CreateWeights: final factor = {C}')
     weights *= C
 
     return weights, mass_node_unique, mass_node
@@ -156,12 +166,12 @@ def ConvertToVector(X,Z, weights, mass_node_unique, mass_node):
     weight_vec = np.zeros(X.shape[0])
     for n in range(X.shape[0]):
         year = int(Z[n, 0, -2])
-        channel = int(Z[n, 0, -1])
+        channel_id = int(Z[n, 0, -1])
         sample_type = int(Z[n,0,0])
         spin = int(Z[n,0, 1] > 0)
         mn = mass_node[n]
         mn_index = np.argmax(mass_node_unique == mn)
-
+        channel = channel_id // 10 - 1
         weight_vec[n] = weights[year - 2016, channel, sample_type - 6, spin,  mn_index]
     return weight_vec
 
@@ -170,9 +180,7 @@ def CreateSampleWeigts(X,Z):
     return ConvertToVector(X,Z, weights, mass_node_unique, mass_node)
 
 @numba.njit
-def CrossCheckWeights(Z, X, w, g_r, res_non_res, check_channel, year, channel):
-    weights, mass_node_unique, mass_node = CreateWeights(X, Z)
-    w = ConvertToVector(X, Z, weights, mass_node_unique, mass_node)
+def CrossCheckWeights(Z, X, w, g_r, res_non_res, check_channel, year):
     w_1 = []
     w_2 = []
     w_3 = []
@@ -192,11 +200,11 @@ def CrossCheckWeights(Z, X, w, g_r, res_non_res, check_channel, year, channel):
 
     elif check_channel == True:
         for n in range(X.shape[0]):
-            if Z[n, 0, -1] == 0 and Z[n, 0, -2] == year:
+            if Z[n, 0, -1] == 13 and Z[n, 0, -2] == year:
                 w_1.append(w[n])
-            elif Z[n, 0, -1] == 1 and Z[n, 0, -2] == year:
+            elif Z[n, 0, -1] == 23 and Z[n, 0, -2] == year:
                 w_2.append(w[n])
-            elif Z[n, 0, -1] == 2 and Z[n, 0, -2] == year:
+            elif Z[n, 0, -1] == 33 and Z[n, 0, -2] == year:
                 w_3.append(w[n])
 
     return np.sum(np.array(w_1)), np.sum(np.array(w_2)), np.sum(np.array(w_3))

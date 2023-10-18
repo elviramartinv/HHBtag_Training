@@ -58,7 +58,11 @@ def PerformTraining(file_name, n_epoch, params):
     data = InputsProducer.CreateRootDF(file_name, 0, True, False)
     X, Y, Z, var_pos, var_pos_z, var_name = InputsProducer.CreateXY(data, args.training_variables)
     print(var_pos)
-    #w = CreateSampleWeigts(X, Z)
+    w = CreateSampleWeigts(X, Z)
+    print(f'graviton=radion check : {CrossCheckWeights(Z, X, w, True, False, False, 2018)}')
+    print(f'res=nonres check : {CrossCheckWeights(Z, X, w, False, True, False, 2018)}')
+    print(f'channel check : {CrossCheckWeights(Z, X, w, False, False, True, 2018)}')
+    raise RuntimeError('stop')
     Y = Y.reshape(Y.shape[0:2])
     tf.random.set_seed(args.seed)
 
