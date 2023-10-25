@@ -2,9 +2,18 @@
 */
 #pragma once
 
-using LorentzVectorM = ROOT::Math::LorentzVector<ROOT::Math::PtEtaPhiM4D<float> >;
-using LorentzVectorE = ROOT::Math::LorentzVector<ROOT::Math::PtEtaPhiE4D<float> >;
-using LorentzVector = ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> >;
+
+using LorentzVectorXYZ = ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double>>;
+using LorentzVectorM = ROOT::Math::LorentzVector<ROOT::Math::PtEtaPhiM4D<double>>;
+using LorentzVectorE = ROOT::Math::LorentzVector<ROOT::Math::PtEtaPhiE4D<double>>;
+using RVecI = ROOT::VecOps::RVec<int>;
+using RVecS = ROOT::VecOps::RVec<size_t>;
+using RVecUC = ROOT::VecOps::RVec<UChar_t>;
+using RVecF = ROOT::VecOps::RVec<float>;
+using RVecB = ROOT::VecOps::RVec<bool>;
+using RVecVecI = ROOT::VecOps::RVec<RVecI>;
+using RVecLV = ROOT::VecOps::RVec<LorentzVectorM>;
+using RVecSetInt = ROOT::VecOps::RVec<std::set<int>>;
 
 LorentzVectorM getHTTp4(float pt0, float eta0, float phi0, float mass0,
                             float pt1, float eta1, float phi1, float mass1)
@@ -250,4 +259,38 @@ inline int ToLegacySampleType(int new_sample_type)
     if(iter == type_map.end())
         throw std::runtime_error("Unknown sample type");
     return iter->second;
+}
+
+inline int ToLegacyChannel(int new_channel)
+{
+	static const std::map<int, int> channel_map = {
+		{13, 0}, //etau
+		{23, 1}, //mutau
+		{33, 2},//tautau
+		{11, -1},
+		{22, 3}
+	};
+	auto iter = channel_map.find(new_channel);
+	if(iter == channel_map.end())
+		throw std::runtime_error("Unknown channel ID");
+	return iter->second;
+}
+			
+
+RVecS CreateIndexes(size_t vecSize){
+  RVecS i(vecSize);
+  std::iota(i.begin(), i.end(), 0);
+  return i;
+}
+
+template<typename V>
+RVecI ReorderObjects(const V& varToOrder, const RVecI& indices, size_t nMax=std::numeric_limits<size_t>::max())
+{
+  RVecI ordered_indices = indices;
+  std::sort(ordered_indices.begin(), ordered_indices.end(), [&](int a, int b) {
+    return varToOrder.at(a) > varToOrder.at(b);
+  });
+  const size_t n = std::min(ordered_indices.size(), nMax);
+  ordered_indices.resize(n);
+  return ordered_indices;
 }

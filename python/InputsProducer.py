@@ -45,7 +45,7 @@ def DefineVariables(sample_name, parity, use_deepTau_ordering) :
         df = df.Filter(f'event % 2 == {parity}')
 
     df = df.Define('spin', '{if (sample == 1 || sample == 3) return 0; else if (sample == 2 || sample == 4) return 2; else return -1; }') \
-           .Define('mass_point', '125') \
+           .Define('mass_point', 'X_mass') \
            .Define('sample_type', 'ToLegacySampleType(sample)') \
            .Define('node', 'node_index') \
            .Define('channelId', 'channel')
@@ -71,6 +71,7 @@ def DefineVariables(sample_name, parity, use_deepTau_ordering) :
                .Define(f'rel_jet_{jet_idx}_E_pt', f'jet_{jet_idx}_valid ? jet_{jet_idx}_p4.E() / jet_{jet_idx}_p4.pt() : 0.f') \
                .Define(f'jet_{jet_idx}_genbJet', f'jet_{jet_idx}_valid ? RecoJet_genMatched.at({jet_idx}) : 0.f') \
                .Define(f'jet_{jet_idx}_deepFlavour', f'jet_{jet_idx}_valid ? RecoJet_btagDeepFlavB.at({jet_idx}) : 0.f') \
+               .Define(f'jet_{jet_idx}_ParticleNet', f'jet_{jet_idx}_valid ? RecoJet_particleNetAK4_B.at({jet_idx}) : 0.f') \
                .Define(f'jet_{jet_idx}_htt_dphi', f'jet_{jet_idx}_valid ? ROOT::Math::VectorUtil::DeltaPhi(htt_p4, jet_{jet_idx}_p4) : 0.f') \
                .Define(f'jet_{jet_idx}_htt_deta', f'jet_{jet_idx}_valid ? (htt_p4.eta()-jet_{jet_idx}_p4.eta()) : 0.f')
                 # .Define(f'jet_{jet_idx}_deepCSV'.format(n_jet), 'jets_deepCSV(jets_deepCsv_BvsAll, jets_deepFlavourOrderedIndex, {})'.format(n_jet)) \
@@ -83,7 +84,7 @@ def CreateColums() :
     ]
 
     jet_column = [ 'jet_{}_valid', 'jet_{}_pt', 'jet_{}_eta', 'jet_{}_E', 'jet_{}_M', 'rel_jet_{}_M_pt', 'rel_jet_{}_E_pt',
-                   'jet_{}_htt_deta', 'jet_{}_deepFlavour', 'jet_{}_htt_dphi', 'jet_{}_genbJet', 
+                   'jet_{}_htt_deta', 'jet_{}_deepFlavour', 'jet_{}_ParticleNet', 'jet_{}_htt_dphi', 'jet_{}_genbJet', 
     ]
 
     all_vars = evt_columns + jet_column
