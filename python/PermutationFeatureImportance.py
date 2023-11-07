@@ -65,7 +65,7 @@ def Shuffle3D (X, var_idx):
                 n += 1
     return X_s
 
-print("shape", X.shape)
+#print("shape", X.shape)
 
 ref_score = pm.sel_acc(Y, model.predict(X, batch_size=params['batch_size']), 2, 2, True, True)
 
@@ -83,3 +83,10 @@ def Compare(X, var_pos, ref_score, params):
 
 dscore, dscore_var =  Compare(X, var_pos, ref_score, params)
 print(dscore_var)
+sorted_dscore_var = {k: v for k, v in sorted(dscore_var.items(), key=lambda item: list(item[1].values())[0])}
+sorted_params = [list(item[1].keys())[0] for item in sorted_dscore_var.items()]
+sorted_dscore_list = [list(item.values())[0] for item in sorted_dscore_var.values()]
+print("sorted_dscore", sorted_params)
+print("sorted_dscore_var", sorted_dscore_list)
+
+

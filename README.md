@@ -8,3 +8,7 @@ PAR=1; python3 -u Training.py -f=/afs/cern.ch/user/e/emartinv/public/Fork_Framew
 
 ## Run Apply.py
 python3 Apply.py --file /afs/cern.ch/user/e/emartinv/public/Fork_Framework/Framework/training_skim/*.root --params_json ../config/params_optimized_training.json --training_variables ../config/training_variables.json --weights model1/model --parity 0
+
+## Training evaluation
+### Run PermutationFeatureImportance.py
+python3 PermutationFeatureImportance.py --parity 1 --weights model/model --training_variables ../config/training_variables.json --params_json ../config/params_optimized_training.json --file /afs/cern.ch/user/e/emartinv/public/Fork_Framework/Framework/training_skim/*.root
