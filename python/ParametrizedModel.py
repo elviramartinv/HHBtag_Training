@@ -115,6 +115,7 @@ class HHModel(Model):
 
         self.final_dense = TimeDistributed(Dense(1, activation="sigmoid"), name='output')
 
+    @tf.function
     def call(self, inputs):
         x = self.normalize(inputs)
         x = self.scale(x)

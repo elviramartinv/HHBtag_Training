@@ -3,6 +3,8 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 import tensorflow as tf
 from tensorflow import keras
+import cmsml
+from cmsml.tensorflow import save_frozen_graph
 
 import argparse
 import json
@@ -27,7 +29,7 @@ class ApplyTraining:
         X, Y, Z, var_pos, var_pos_z, var_name = InputsProducer.CreateXY(data, self.training_variables)
         self.model_path = model_path
         if not self.model_built:
-            self.model = pm.HHModel(var_pos, self.mean_std_json, self.min_max_red_json, self.params)
+            self.model = pm.HHModel(var_pos, self.mean_std_json, self.min_max_red_json, self.params, training=False)
             opt = getattr(tf.keras.optimizers, self.params['optimizers'])(learning_rate=10 ** self.params['learning_rate_exp'])
             self.model.compile(loss='binary_crossentropy',
                       optimizer=opt,
@@ -47,8 +49,11 @@ if __name__ == "__main__":
     parser.add_argument("-params_json", "--params_json")
     parser.add_argument("-f", "--file", nargs='+')
     parser.add_argument("-w", "--weights")
+    #parser.add_argument("-output", "--output")
 
     args = parser.parse_args()
 
     applier = ApplyTraining(args.params_json, '../config/mean_std_red.json', '../config/min_max_red.json', args.training_variables)
-    pred = applier.apply(args.file[0], args.weights, args.parity)
+    pred, Y = applier.apply(args.file[0], args.weights, args.parity)
+    #np.save(args.output, pred)
+    save_frozen_graph('my_model.pb', applier.model)
