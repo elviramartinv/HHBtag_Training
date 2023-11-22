@@ -29,7 +29,7 @@ class ApplyTraining:
         X, Y, Z, var_pos, var_pos_z, var_name = InputsProducer.CreateXY(data, self.training_variables)
         self.model_path = model_path
         if not self.model_built:
-            self.model = pm.HHModel(var_pos, self.mean_std_json, self.min_max_red_json, self.params, training=False)
+            self.model = pm.HHModel(var_pos, self.mean_std_json, self.min_max_red_json, self.params)
             opt = getattr(tf.keras.optimizers, self.params['optimizers'])(learning_rate=10 ** self.params['learning_rate_exp'])
             self.model.compile(loss='binary_crossentropy',
                       optimizer=opt,
