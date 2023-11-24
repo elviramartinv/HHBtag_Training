@@ -2,12 +2,13 @@
 # This file is part of https://github.com/hh-italian-group/hh-bbtautau.
 
 import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+# os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 import tensorflow as tf
 gpus = tf.config.experimental.list_physical_devices('GPU')
 #print(gpus)
-tf.config.experimental.set_memory_growth(gpus[0], True)
+if len(gpus) > 0:
+    tf.config.experimental.set_memory_growth(gpus[0], True)
 
 from tensorflow import keras
 from tensorflow.keras.callbacks import CSVLogger
@@ -66,7 +67,12 @@ def PerformTraining(file_name, n_epoch, params):
     Y = Y.reshape(Y.shape[0:2])
     tf.random.set_seed(args.seed)
 
-    model = pm.HHModel(var_pos,'../config/mean_std_red.json', '../config/min_max_red.json', params)
+    file_dir = os.path.dirname(os.path.abspath(__file__))
+    base_dir = os.path.dirname(file_dir)
+    cfg_dir = os.path.join(base_dir, 'config')
+
+    model = pm.HHModel(var_pos, os.path.join(cfg_dir, 'mean_std_red.json'),
+                       os.path.join(cfg_dir, 'min_max_red.json'), params)
     model.call(X[0:1,:,:])
     opt = getattr(tf.keras.optimizers, params['optimizers'])(lr=10 ** params['learning_rate_exp'])
     model.compile(loss='binary_crossentropy',
@@ -85,7 +91,7 @@ def PerformTraining(file_name, n_epoch, params):
 
     early_stop = tf.keras.callbacks.EarlyStopping(monitor='val_sel_acc_2', mode='max', patience=args.patience)
     csv_logger = CSVLogger(os.path.join(args.output, 'history.csv'), append=False, separator=',')
-    
+
     save_best_only =  tf.keras.callbacks.ModelCheckpoint(filepath=os.path.join(args.output, 'model'),
                                                          monitor='val_sel_acc_2',  mode='max', save_best_only=True, save_weights_only=False, verbose=1)
 

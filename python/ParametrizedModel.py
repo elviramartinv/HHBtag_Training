@@ -32,7 +32,7 @@ class StdLayer(Layer):
     def build(self, input_shape):
         super(StdLayer, self).build(input_shape)
 
-    def call(self, X):
+    def call(self, X, training=False):
         Y = tf.clip_by_value(( X - self.vars_mean ) / self.vars_std, -self.n_sigmas, self.n_sigmas)
         return tf.where(self.vars_apply, Y, X)
 
@@ -61,7 +61,7 @@ class ScaleLayer(Layer):
     def build(self, input_shape):
         super(ScaleLayer, self).build(input_shape)
 
-    def call(self, X):
+    def call(self, X, training=False):
         Y = tf.clip_by_value( (self.y * ( X - self.vars_min))  + self.a , self.a, self.b)
         return tf.where(self.vars_apply, Y, X)
 
@@ -116,37 +116,37 @@ class HHModel(Model):
         self.final_dense = TimeDistributed(Dense(1, activation="sigmoid"), name='output')
 
     @tf.function
-    def call(self, inputs):
-        x = self.normalize(inputs)
-        x = self.scale(x)
+    def call(self, inputs, training=False):
+        x = self.normalize(inputs, training=training)
+        x = self.scale(x, training=training)
         mask = tf.convert_to_tensor(inputs[:, :, 0] > 0.5, dtype=tf.bool)
 
         x = x[:, :, 1:]
         for i in range(len(self.dense_pre)):
-            x = self.dense_pre[i](x, mask=mask)
+            x = self.dense_pre[i](x, mask=mask, training=training)
             if len(self.batch_norm_dense_pre) > i:
-                x = self.batch_norm_dense_pre[i](x)
+                x = self.batch_norm_dense_pre[i](x, training=training)
             if len(self.dropout_dense_pre) > i:
-                x = self.dropout_dense_pre[i](x)
+                x = self.dropout_dense_pre[i](x, training=training)
 
         last_pre = x
 
         for i in range(len(self.rnn)):
-            x = self.rnn[i](x, mask=mask)
+            x = self.rnn[i](x, mask=mask, training=training)
             if len(self.batch_norm_rnn) > i:
-                x = self.batch_norm_rnn[i](x)
+                x = self.batch_norm_rnn[i](x, training=training)
             if len(self.dropout_rnn) > i:
-                x = self.dropout_rnn[i](x)
+                x = self.dropout_rnn[i](x, training=training)
             if i < len(self.rnn) - 1 :
                 x = self.concatenate[i]([last_pre, x])
 
         for i in range(len(self.dense_post)):
-            x = self.dense_post[i](x, mask=mask)
+            x = self.dense_post[i](x, mask=mask, training=training)
             if len(self.batch_norm_dense_post) > i:
-                x = self.batch_norm_dense_post[i](x)
+                x = self.batch_norm_dense_post[i](x, training=training)
             if len(self.dropout_dense_post) > i:
-                x = self.dropout_dense_post[i](x)
-        x = self.final_dense(x, mask=mask)
+                x = self.dropout_dense_post[i](x, training=training)
+        x = self.final_dense(x, mask=mask, training=training)
 
         input_shape = tf.shape(inputs)
         x = tf.reshape(x, shape=(input_shape[0], input_shape[1]))

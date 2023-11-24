@@ -4,7 +4,7 @@
 
 import numpy as np
 import ROOT
-import sys
+import os
 import json
 initialized = False
 max_jet = 10
@@ -36,7 +36,10 @@ def FindFiles(path, pattern) :
 def DefineVariables(sample_name, parity, use_deepTau_ordering) :
     global initialized
     if not initialized:
-        ROOT.gInterpreter.Declare('#include "../include/pyInterface.h"')
+        file_dir = os.path.dirname(os.path.abspath(__file__))
+        base_dir = os.path.dirname(file_dir)
+        pyInterface_path = os.path.join(base_dir, 'include', 'pyInterface.h')
+        ROOT.gInterpreter.Declare(f'#include "{pyInterface_path}"')
         initialized = True
 
     df = ROOT.ROOT.RDataFrame('Event', sample_name)
@@ -84,12 +87,12 @@ def CreateColums() :
     ]
 
     jet_column = [ 'jet_{}_valid', 'jet_{}_pt', 'jet_{}_eta', 'jet_{}_E', 'jet_{}_M', 'rel_jet_{}_M_pt', 'rel_jet_{}_E_pt',
-                   'jet_{}_htt_deta', 'jet_{}_deepFlavour', 'jet_{}_ParticleNet', 'jet_{}_htt_dphi', 'jet_{}_genbJet', 
+                   'jet_{}_htt_deta', 'jet_{}_deepFlavour', 'jet_{}_ParticleNet', 'jet_{}_htt_dphi', 'jet_{}_genbJet',
     ]
 
     all_vars = evt_columns + jet_column
     jet_columns = []
-    
+
     for jet_var in jet_column :
         for n in range(10) :
             jet_columns.append(jet_var.format(n))

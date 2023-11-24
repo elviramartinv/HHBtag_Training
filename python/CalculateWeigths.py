@@ -1,4 +1,4 @@
-import sys
+import os
 import pandas as pd
 import numpy as np
 import numba
@@ -72,12 +72,16 @@ def CreateXSTable(X, Z, radion_xs, radion_br, vbf_radion_xs, graviton_xs, gravit
     return xs_all, counts, weights, mass_node_unique, mass_node
 
 def CreateWeights(X, Z):
-    xs_all, counts, weights, mass_node_unique, mass_node = CreateXSTable(X, Z, '../config/xs_br/radion_ggF_xs.csv',
-                                                                        '../config/xs_br/radion_br.csv',
-                                                                        '../config/xs_br/radion_VBF_xs.csv',
-                                                                        '../config/xs_br/graviton_ggF_xs.csv',
-                                                                        '../config/xs_br/graviton_br.csv',
-                                                                        '../config/xs_br/graviton_VBF_xs.csv')
+    file_dir = os.path.dirname(os.path.abspath(__file__))
+    base_dir = os.path.dirname(file_dir)
+    xs_br_dir = os.path.join(base_dir, 'config', 'xs_br')
+    xs_all, counts, weights, mass_node_unique, mass_node = CreateXSTable(X, Z,
+        os.path.join(xs_br_dir, 'radion_ggF_xs.csv'),
+        os.path.join(xs_br_dir, 'radion_br.csv'),
+        os.path.join(xs_br_dir, 'radion_VBF_xs.csv'),
+        os.path.join(xs_br_dir, 'graviton_ggF_xs.csv'),
+        os.path.join(xs_br_dir, 'graviton_br.csv'),
+        os.path.join(xs_br_dir, 'graviton_VBF_xs.csv'))
 
     for sample_type in range(4):
         for spin in range(2):
