@@ -51,15 +51,15 @@ def DefineVariables(sample_name, parity, use_deepTau_ordering) :
            .Define('mass_point', 'X_mass') \
            .Define('sample_type', 'ToLegacySampleType(sample)') \
            .Define('node', 'node_index') \
-           .Define('channelId', 'channel')
+           .Define('channelId', 'ToLegacyChannel(channel)')
     df = df.Define('sample_year', '2018')
     df = df.Define('n_jets', 'RecoJet_pt.size()') \
            .Define('htt_scalar_pt', 'HttCandidate_leg0_pt + HttCandidate_leg1_pt') \
            .Define('htt_p4', 'getHTTp4(HttCandidate_leg0_pt, HttCandidate_leg0_eta, HttCandidate_leg0_phi, HttCandidate_leg0_mass,HttCandidate_leg1_pt, HttCandidate_leg1_eta, HttCandidate_leg1_phi, HttCandidate_leg1_mass)') \
            .Define('htt_pt', 'htt_p4.pt()') \
            .Define('htt_eta', 'htt_p4.eta()') \
-           .Define('rel_met_pt_htt_pt', 'MET_pt / htt_pt') \
-           .Define('htt_met_dphi', 'htt_p4.phi()- MET_phi') \
+           .Define('rel_met_pt_htt_pt', 'MET_pt / htt_scalar_pt') \
+           .Define('htt_met_dphi', 'TVector2::Phi_mpi_pi(MET_phi - htt_p4.phi())') \
            # .Define('jets_genbJet', 'MakeGenbJet(jets_genJetIndex, jets_deepFlavourOrderedIndex)') \
            # .Filter('std::accumulate(jets_genbJet.begin(), jets_genbJet.end(), 0) == 2')
 
