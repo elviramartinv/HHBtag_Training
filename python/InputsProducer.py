@@ -19,6 +19,7 @@ class SampleType:
     VBFHH_NonRes = 7
     ggHH_Res = 8
     VBFHH_Res = 9
+    VV = 10
 
 def FindFiles(path, pattern) :
     files = []
@@ -43,7 +44,7 @@ def DefineVariables(sample_name, parity, use_deepTau_ordering) :
         initialized = True
 
     df = ROOT.ROOT.RDataFrame('Event', sample_name)
-
+    
     if parity >= 0 and parity <= 1:
         df = df.Filter(f'event % 2 == {parity}')
 
@@ -54,8 +55,8 @@ def DefineVariables(sample_name, parity, use_deepTau_ordering) :
            .Define('channelId', 'ToLegacyChannel(channel)')
     df = df.Define('sample_year', '2018')
     df = df.Define('n_jets', 'RecoJet_pt.size()') \
-           .Define('htt_scalar_pt', 'HttCandidate_leg0_pt + HttCandidate_leg1_pt') \
-           .Define('htt_p4', 'getHTTp4(HttCandidate_leg0_pt, HttCandidate_leg0_eta, HttCandidate_leg0_phi, HttCandidate_leg0_mass,HttCandidate_leg1_pt, HttCandidate_leg1_eta, HttCandidate_leg1_phi, HttCandidate_leg1_mass)') \
+           .Define('htt_scalar_pt', 'ZttCandidate_leg0_pt + ZttCandidate_leg1_pt') \
+           .Define('htt_p4', 'getHTTp4(ZttCandidate_leg0_pt, ZttCandidate_leg0_eta, ZttCandidate_leg0_phi, ZttCandidate_leg0_mass, ZttCandidate_leg1_pt, ZttCandidate_leg1_eta, ZttCandidate_leg1_phi, ZttCandidate_leg1_mass)') \
            .Define('htt_pt', 'htt_p4.pt()') \
            .Define('htt_eta', 'htt_p4.eta()') \
            .Define('rel_met_pt_htt_pt', 'MET_pt / htt_scalar_pt') \
@@ -74,7 +75,6 @@ def DefineVariables(sample_name, parity, use_deepTau_ordering) :
                .Define(f'rel_jet_{jet_idx}_E_pt', f'jet_{jet_idx}_valid ? jet_{jet_idx}_p4.E() / jet_{jet_idx}_p4.pt() : 0.f') \
                .Define(f'jet_{jet_idx}_genbJet', f'jet_{jet_idx}_valid ? RecoJet_genMatched.at({jet_idx}) : 0.f') \
                .Define(f'jet_{jet_idx}_deepFlavour', f'jet_{jet_idx}_valid ? RecoJet_btagDeepFlavB.at({jet_idx}) : 0.f') \
-               .Define(f'jet_{jet_idx}_ParticleNet', f'jet_{jet_idx}_valid ? RecoJet_particleNetAK4_B.at({jet_idx}) : 0.f') \
                .Define(f'jet_{jet_idx}_htt_dphi', f'jet_{jet_idx}_valid ? ROOT::Math::VectorUtil::DeltaPhi(htt_p4, jet_{jet_idx}_p4) : 0.f') \
                .Define(f'jet_{jet_idx}_htt_deta', f'jet_{jet_idx}_valid ? (htt_p4.eta()-jet_{jet_idx}_p4.eta()) : 0.f')
                 # .Define(f'jet_{jet_idx}_deepCSV'.format(n_jet), 'jets_deepCSV(jets_deepCsv_BvsAll, jets_deepFlavourOrderedIndex, {})'.format(n_jet)) \
@@ -87,7 +87,7 @@ def CreateColums() :
     ]
 
     jet_column = [ 'jet_{}_valid', 'jet_{}_pt', 'jet_{}_eta', 'jet_{}_E', 'jet_{}_M', 'rel_jet_{}_M_pt', 'rel_jet_{}_E_pt',
-                   'jet_{}_htt_deta', 'jet_{}_deepFlavour', 'jet_{}_ParticleNet', 'jet_{}_htt_dphi', 'jet_{}_genbJet',
+                   'jet_{}_htt_deta', 'jet_{}_deepFlavour', 'jet_{}_htt_dphi', 'jet_{}_genbJet',
     ]
 
     all_vars = evt_columns + jet_column
@@ -123,6 +123,8 @@ def CreateInputs(raw_data):
 
     evt_vars_idx = GetIndex(evt_columns)
     jet_vars_idx = GetIndex(jet_column)
+    print("evt_vars_idx", evt_vars_idx)
+    print("jet_vars_idx", jet_vars_idx)
 
     for jet_idx in range(max_jet):
         for n in range(len(evt_vars_idx)):

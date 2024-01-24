@@ -253,7 +253,7 @@ inline int ToLegacySampleType(int new_sample_type)
     static const std::map<int, int> type_map = {
         { 1, 8 }, {2, 8}, 
         { 3, 9 }, {4, 9}, 
-        { 17, 6 }, 
+        { 17, 6 }, {11, 10}
     };
     auto iter = type_map.find(new_sample_type);
     if(iter == type_map.end())
@@ -268,11 +268,12 @@ inline int ToLegacyChannel(int new_channel)
 		{23, 1}, //mutau
 		{33, 2},//tautau
 		{11, -1},
+        {12, -1},
 		{22, 3}
 	};
 	auto iter = channel_map.find(new_channel);
 	if(iter == channel_map.end())
-		throw std::runtime_error("Unknown channel ID");
+		throw std::runtime_error("Unknown channel ID:"+ std::to_string(new_channel));
 	return iter->second;
 }
 			
