@@ -43,6 +43,7 @@ def DefineVariables(sample_name, parity, use_deepTau_ordering) :
         initialized = True
 
     df = ROOT.ROOT.RDataFrame('Event', sample_name)
+  
 
     if parity >= 0 and parity <= 1:
         df = df.Filter(f'event % 2 == {parity}')
@@ -52,7 +53,7 @@ def DefineVariables(sample_name, parity, use_deepTau_ordering) :
            .Define('sample_type', 'ToLegacySampleType(sample)') \
            .Define('node', 'node_index') \
            .Define('channelId', 'ToLegacyChannel(channel)')
-    df = df.Define('sample_year', '2018')
+    df = df.Define('sample_year', 'ToLegacyYear(period)')      
     df = df.Define('n_jets', 'RecoJet_pt.size()') \
            .Define('htt_scalar_pt', 'HttCandidate_leg0_pt + HttCandidate_leg1_pt') \
            .Define('htt_p4', 'getHTTp4(HttCandidate_leg0_pt, HttCandidate_leg0_eta, HttCandidate_leg0_phi, HttCandidate_leg0_mass,HttCandidate_leg1_pt, HttCandidate_leg1_eta, HttCandidate_leg1_phi, HttCandidate_leg1_mass)') \

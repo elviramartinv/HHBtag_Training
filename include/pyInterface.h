@@ -268,11 +268,25 @@ inline int ToLegacyChannel(int new_channel)
 		{23, 1}, //mutau
 		{33, 2},//tautau
 		{11, -1},
-		{22, 3}
+		{22, -1},
+        {12, -1}
 	};
 	auto iter = channel_map.find(new_channel);
 	if(iter == channel_map.end())
 		throw std::runtime_error("Unknown channel ID");
+	return iter->second;
+}
+
+inline int ToLegacyYear(int new_year)
+{
+	static const std::map<int, int> year_map = {
+		{2, 2016}, 
+		{3, 2017},
+		{4, 2018}
+	};
+	auto iter = year_map.find(new_year);
+	if(iter == year_map.end())
+		throw std::runtime_error("Unknown year");
 	return iter->second;
 }
 			

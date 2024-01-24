@@ -74,7 +74,7 @@ def PerformTraining(file_name, n_epoch, params):
     model = pm.HHModel(var_pos, os.path.join(cfg_dir, 'mean_std_red.json'),
                        os.path.join(cfg_dir, 'min_max_red.json'), params)
     model.call(X[0:1,:,:])
-    opt = getattr(tf.keras.optimizers, params['optimizers'])(lr=10 ** params['learning_rate_exp'])
+    opt = getattr(tf.keras.optimizers, params['optimizers'])(lr=10 ** params['learning_rate_exp'], weight_decay=10 ** params['weight_decay_exp'])
     model.compile(loss='binary_crossentropy',
                   optimizer=opt,
                   weighted_metrics=[pm.sel_acc_2])
@@ -101,7 +101,7 @@ def PerformTraining(file_name, n_epoch, params):
     #model.save_weights('{}_par{}_final_weights.tf'.format(args.output, args.parity))
     #model.save_weights('{}_par{}_final_weights.h5'.format(args.output, args.parity))
 
-with open('{}_par{}_params.json'.format(args.output, args.parity), 'w') as f:
-    f.write(json.dumps(params, indent=4))
+#with open('{}_par{}_params.json'.format(args.output, args.parity), 'w') as f:
+#    f.write(json.dumps(params, indent=4))
 
 PerformTraining(file_name, args.n_epoch, params)
