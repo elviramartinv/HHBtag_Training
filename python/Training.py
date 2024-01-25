@@ -59,12 +59,12 @@ def PerformTraining(file_name, n_epoch, params):
     data = InputsProducer.CreateRootDF(file_name, 0, True, False)
     X, Y, Z, var_pos, var_pos_z, var_name = InputsProducer.CreateXY(data, args.training_variables)
     print(var_pos)
-    raise RuntimeError('stop')
+    # raise RuntimeError('stop')
     w = CreateSampleWeigts(X, Z)
     # print(f'graviton=radion check : {CrossCheckWeights(Z, X, w, True, False, False, 2018)}')
     # print(f'res=nonres check : {CrossCheckWeights(Z, X, w, False, True, False, 2018)}')
-    print(f'channel check : {CrossCheckWeights(Z, X, w, False, False, True, 2018)}')
-    raise RuntimeError('stop')
+    # print(f'channel check : {CrossCheckWeights(Z, X, w, False, False, True, 2018)}')
+    # raise RuntimeError('stop')
     Y = Y.reshape(Y.shape[0:2])
     tf.random.set_seed(args.seed)
 
@@ -102,7 +102,7 @@ def PerformTraining(file_name, n_epoch, params):
     #model.save_weights('{}_par{}_final_weights.tf'.format(args.output, args.parity))
     #model.save_weights('{}_par{}_final_weights.h5'.format(args.output, args.parity))
 
-with open('{}_par{}_params.json'.format(args.output, args.parity), 'w') as f:
-    f.write(json.dumps(params, indent=4))
+# with open('{}_par{}_params.json'.format(args.output, args.parity), 'w') as f:
+#     f.write(json.dumps(params, indent=4))
 
 PerformTraining(file_name, args.n_epoch, params)

@@ -53,7 +53,7 @@ def DefineVariables(sample_name, parity, use_deepTau_ordering) :
            .Define('sample_type', 'ToLegacySampleType(sample)') \
            .Define('node', 'node_index') \
            .Define('channelId', 'ToLegacyChannel(channel)')
-    df = df.Define('sample_year', '2018')
+    df = df.Define('sample_year', 'ToLegacyYear(period)')
     df = df.Define('n_jets', 'RecoJet_pt.size()') \
            .Define('htt_scalar_pt', 'ZttCandidate_leg0_pt + ZttCandidate_leg1_pt') \
            .Define('htt_p4', 'getHTTp4(ZttCandidate_leg0_pt, ZttCandidate_leg0_eta, ZttCandidate_leg0_phi, ZttCandidate_leg0_mass, ZttCandidate_leg1_pt, ZttCandidate_leg1_eta, ZttCandidate_leg1_phi, ZttCandidate_leg1_mass)') \
@@ -123,8 +123,8 @@ def CreateInputs(raw_data):
 
     evt_vars_idx = GetIndex(evt_columns)
     jet_vars_idx = GetIndex(jet_column)
-    print("evt_vars_idx", evt_vars_idx)
-    print("jet_vars_idx", jet_vars_idx)
+    # print("evt_vars_idx", evt_vars_idx)
+    # print("jet_vars_idx", jet_vars_idx)
 
     for jet_idx in range(max_jet):
         for n in range(len(evt_vars_idx)):

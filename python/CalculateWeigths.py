@@ -168,6 +168,7 @@ def CreateWeights(X, Z):
 @numba.njit
 def ConvertToVector(X,Z, weights, mass_node_unique, mass_node):
     weight_vec = np.zeros(X.shape[0])
+    # print (range(X.shape[0]))
     for n in range(X.shape[0]):
         year = int(Z[n, 0, -2])
         channel_id = int(Z[n, 0, -1])

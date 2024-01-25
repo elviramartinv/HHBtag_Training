@@ -33,6 +33,8 @@ class ApplyTraining:
     def apply(self, file_name, model_path, parity):
         data = InputsProducer.CreateRootDF(file_name, parity, False, True)
         X, Y, Z, var_pos, var_pos_z, var_name = InputsProducer.CreateXY(data, self.training_variables)
+        # event_sel = Z[:, 0, -2] == 15014
+        # X_sel = X[event_sel, :, :]
         self.model_path = model_path
         if not self.model_built:
             # self.model = pm.HHModel(var_pos, self.mean_std_json, self.min_max_red_json, self.params)
@@ -51,7 +53,7 @@ class ApplyTraining:
             self.model.summary()
             self.model_built = True
         pred = self.model.call(X, training=False).numpy()
-        return pred, Y
+        return pred, Y, Z[:, 0, -2], Z[:, :, -1]
 
 
 if __name__ == "__main__":
@@ -70,7 +72,7 @@ if __name__ == "__main__":
     cfg_dir = os.path.join(base_dir, 'config')
     applier = ApplyTraining(args.params_json, os.path.join(cfg_dir, 'mean_std_red.json'),
                             os.path.join(cfg_dir, 'min_max_red.json'), args.training_variables)
-    pred, Y = applier.apply(args.file[0], args.weights, args.parity)
+    pred, Y, evt, cpp_scores = applier.apply(args.file[0], args.weights, args.parity)
     #np.save(args.output, pred)
 
     # save_frozen_graph('my_model.pb', applier.model)
