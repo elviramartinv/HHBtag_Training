@@ -12,7 +12,7 @@ from statsmodels.stats.proportion import proportion_confint
 
 from Apply import ApplyTraining
 
-masses = [400]
+masses = [200]
 
 path = "/afs/cern.ch/user/e/emartinv/public/cms-hh-bbtautau/Framework/ZZ_training_ntuples/gg_X_ZZbbtautau_M"
 
@@ -45,7 +45,7 @@ for mass in masses:
         
         results_hhbtag[parity] = {}
         error_results_hhbtag[parity] = {}
-        weights = f'ZZ_400_par{abs(parity-1)}/model'
+        weights = f'test_24Jan_par{abs(parity-1)}/model'
         
         newHH_pred, genMatched, events, cpp_scores = applier.apply(file, weights, parity)
         newHH_sorted = np.argsort(-newHH_pred)
@@ -142,7 +142,9 @@ for mass in masses:
     results[mass] = file_results
     #print("results", results[mass])
 
-with open("output/ZZ/json/ZZ_400.json", "w") as json_file:
+# with open("output/ZZ/json/ZZ_200.json", "w") as json_file:
+#     json.dump(results, json_file)
+with open("output/ZZ/json/HH_200.json", "w") as json_file:
     json.dump(results, json_file)
 
 
