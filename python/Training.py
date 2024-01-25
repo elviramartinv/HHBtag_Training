@@ -56,7 +56,7 @@ class WeightsSaver(Callback):
 
 def PerformTraining(file_name, n_epoch, params):
     np.random.seed(args.seed)
-    data = InputsProducer.CreateRootDF(file_name, 0, True, False)
+    data = InputsProducer.CreateRootDF(file_name, args.parity, True, False)
     X, Y, Z, var_pos, var_pos_z, var_name = InputsProducer.CreateXY(data, args.training_variables)
     print(var_pos)
     w = CreateSampleWeigts(X, Z)
