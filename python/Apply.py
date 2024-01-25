@@ -35,6 +35,7 @@ class ApplyTraining:
         X, Y, Z, var_pos, var_pos_z, var_name = InputsProducer.CreateXY(data, self.training_variables)
         # event_sel = Z[:, 0, -2] == 15014
         # X_sel = X[event_sel, :, :]
+        self.parity = parity
         self.model_path = model_path
         if not self.model_built:
             # self.model = pm.HHModel(var_pos, self.mean_std_json, self.min_max_red_json, self.params)
