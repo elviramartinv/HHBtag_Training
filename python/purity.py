@@ -13,10 +13,10 @@ from statsmodels.stats.proportion import proportion_confint
 from Apply import ApplyTraining
 
 # ggf and VBF res
-#masses = [250, 260, 270, 280, 300, 320, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 900, 1000, 1250, 1500, 2000, 2500, 3000]
-# masses = [250, 260, 280, 300, 320, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 900, 1000, 1500, 3000]
+# masses = [250, 260, 270, 280, 300, 320, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 900, 1000, 1250, 1500, 2000, 2500, 3000]
+masses = [250, 260, 280, 300, 320, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 900, 1000, 1500, 3000]
 #ggf non res
-masses = ['SM', 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+# masses = ['SM', 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
 # masses = ['SM']
 #masses = [250,300,500]
 #VBF non res
@@ -25,7 +25,7 @@ masses = ['SM', 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
 # path = "/afs/cern.ch/user/e/emartinv/public/Ntuple_prod/training_ntuples/GluGluToRadionToHHTo2B2Tau_M-"
 # path = "/afs/cern.ch/user/e/emartinv/public/Ntuple_prod/training_ntuples/VBFToBulkGravitonToHHTo2B2Tau_M-"
 # path = "/afs/cern.ch/user/e/emartinv/public/Ntuple_prod/training_ntuples/VBFToRadionToHHTo2B2Tau_M-"
-path = "/afs/cern.ch/user/e/emartinv/public/training_ntuples_RunII/2018_GluGluToHHTo2B2Tau_node_" 
+path = "/afs/cern.ch/user/e/emartinv/public/training_ntuples_RunII/2016_VBFToBulkGravitonToHHTo2B2Tau_M-" 
 
 taggers = ["particleNetAK4_B", "HHBtagScore", "btagDeepFlavB"]
 results = {}
@@ -59,7 +59,7 @@ for mass in masses:
         
         results_hhbtag[parity] = {}
         error_results_hhbtag[parity] = {}
-        weights = f'RunII_19Jan_par{abs(parity-1)}/model'
+        weights = f'test_24Jan_par{abs(parity-1)}/model'
         
         newHH_pred, genMatched, events, cpp_scores = applier.apply(file, weights, parity)
         newHH_sorted = np.argsort(-newHH_pred)
@@ -156,7 +156,7 @@ for mass in masses:
     results[mass] = file_results
     #print("results", results[mass])
 
-with open("output/RunII_19Jan/json/2018_nonres.json", "w") as json_file:
+with open("output/test_24Jan/json/2016_vbf_spin2.json", "w") as json_file:
     json.dump(results, json_file)
 
 
@@ -185,14 +185,14 @@ ay.errorbar(xtick_locations, newHHbtag_purities, yerr=np.array(newHHbtag_err).T,
 
 plt.xticks(xtick_locations, masses, rotation=45)
 
-plt.xlabel('EFT benchmark')
+plt.xlabel('mX [GeV]')
 plt.ylabel('Purity')
-plt.title('ggF nonRes')
+plt.title('VBF spin2')
 plt.legend()
 # plt.grid()
 plt.tight_layout()
 
-plt.savefig('output/RunII_19Jan/ggf_nonRes_2018.pdf')
+plt.savefig('output/test_24Jan/vbf_spin2_2016.pdf')
 #plt.savefig('purity_ggF_nonres.png', dpi=300)
 
 
