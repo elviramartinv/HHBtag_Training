@@ -12,9 +12,9 @@ from statsmodels.stats.proportion import proportion_confint
 
 from Apply import ApplyTraining
 
-masses = [200]
+masses = [200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500, 2000, 3000]
 
-path = "/afs/cern.ch/user/e/emartinv/public/cms-hh-bbtautau/Framework/ZZ_training_ntuples/gg_X_ZZbbtautau_M"
+path = "/eos/user/e/emartinv/HHBtag_Training/training_skims/ZZ_merge/gg_X_ZZbbtautau_M"
 
 taggers = ["HHBtagScore", "btagDeepFlavB"]
 results = {}
@@ -144,7 +144,7 @@ for mass in masses:
 
 # with open("output/ZZ/json/ZZ_200.json", "w") as json_file:
 #     json.dump(results, json_file)
-with open("output/ZZ/json/HH_200.json", "w") as json_file:
+with open("output/ZZ_points/json/HH.json", "w") as json_file:
     json.dump(results, json_file)
 
 
