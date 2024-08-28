@@ -34,8 +34,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--model", help="Name of the model without parity", required=True)
 args = parser.parse_args()
 
-feat_imp_even_path = os.path.join(args.model + "_par0", "feat_imp.json")
-feat_imp_odd_path = os.path.join(args.model + "_par1", "feat_imp.json")
+feat_imp_even_path = os.path.join(args.model + "_par1", "feat_imp.json")
+feat_imp_odd_path = os.path.join(args.model + "_par0", "feat_imp.json")
 
 if not os.path.exists(feat_imp_even_path):
     raise FileNotFoundError(f"The file {feat_imp_even_path} doesn't exist.")
