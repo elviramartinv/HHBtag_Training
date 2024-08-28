@@ -12,11 +12,17 @@ import argparse
 import numba
 import json
 import numpy as np
+import pandas as pd
+import os
 
 import InputsProducer
 import ParametrizedModel as pm
 #import BayesianOptimizationCustom as bo
 from CalculateWeigths import CreateSampleWeigts, CrossCheckWeights
+
+import matplotlib.pyplot as plt
+import json
+import seaborn as sns
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-w", "--weights")
@@ -35,7 +41,8 @@ data = InputsProducer.CreateRootDF(file_name, args.parity, False, True)
 X, Y, Z, var_pos, var_pos_z, var_name = InputsProducer.CreateXY(data, args.training_variables)
 
 model = pm.HHModel(var_pos, '../config/mean_std_red.json', '../config/min_max_red.json', params)
-opt = getattr(tf.keras.optimizers, params['optimizers'])(learning_rate=10 ** params['learning_rate_exp'])
+opt = getattr(tf.keras.optimizers, params['optimizers'])(learning_rate=10 ** params['learning_rate_exp']) ### AdamW
+# opt = getattr(tf.keras.optimizers.legacy, params['optimizers'])(learning_rate=10 ** params['learning_rate_exp']) ### Adam
 model.compile(loss='binary_crossentropy',
               optimizer=opt,
               weighted_metrics=[pm.sel_acc_2, pm.sel_acc_3, pm.sel_acc_4])
@@ -65,7 +72,7 @@ def Shuffle3D (X, var_idx):
                 n += 1
     return X_s
 
-#print("shape", X.shape)
+print("shape", X.shape)
 
 ref_score = pm.sel_acc(Y, model.predict(X, batch_size=params['batch_size']), 2, 2, True, True)
 
@@ -77,6 +84,7 @@ def Compare(X, var_pos, ref_score, params):
         var_score = pm.sel_acc(Y, model.predict(X_shuffled,  batch_size=params['batch_size'], steps=None), 2, 2,True, True)
         dscore_var[var_idx] = { var_name[var_idx] : ref_score - var_score}
         dscore.append(ref_score - var_score)
+        
 
     # dscore.sort(reverse = True)
     return dscore, dscore_var
@@ -86,7 +94,48 @@ print(dscore_var)
 sorted_dscore_var = {k: v for k, v in sorted(dscore_var.items(), key=lambda item: list(item[1].values())[0])}
 sorted_params = [list(item[1].keys())[0] for item in sorted_dscore_var.items()]
 sorted_dscore_list = [list(item.values())[0] for item in sorted_dscore_var.values()]
-print("sorted_dscore", sorted_params)
-print("sorted_dscore_var", sorted_dscore_list)
+# print("sorted_dscore", sorted_params)
+# print("sorted_dscore_var", sorted_dscore_list)
 
+# json_path = os.path.join(os.path.dirname(args.weights), '../', 'feat_imp.py')
+scores_dict = {list(item.keys())[0]: list(item.values())[0] for item in sorted_dscore_var.values()}
+
+# Ruta para guardar el archivo JSON
+scores_dict = {list(item.keys())[0]: float(list(item.values())[0]) for item in sorted_dscore_var.values()}
+
+# Ruta para guardar el archivo JSON
+output_path = os.path.join(os.path.dirname(args.weights), 'feat_imp.json')
+
+# Guardar el diccionario como archivo JSON
+with open(output_path, 'w') as json_file:
+    json.dump(scores_dict, json_file, indent=4)
+
+print(f"Scores guardados en {output_path}")
+
+
+
+# import json
+# dscore_var = {k: {k2: float(v2) for k2, v2 in v.items()} for k, v in dscore_var.items()}
+# with open('feat_imp.py', 'w') as f:
+#     json.dump(dscore_var, f)
+
+# from sklearn.metrics import confusion_matrix
+# cm = confusion_matrix(Y, model.predict(X) > 0.5)
+# print(cm)
+
+df = pd.DataFrame(X.reshape(-1, X.shape[-1]), columns=var_name.values())
+corr_matrix = df.corr()
+print(corr_matrix)
+
+plt.figure(figsize=(15, 14))
+sns.set(font_scale=2) 
+heatmap = sns.heatmap(corr_matrix, vmin=-1, vmax=1, cmap='PRGn', annot=True, linewidths=0.5, linecolor='white', square=True, annot_kws={"size": 7})
+
+heatmap.tick_params(axis='both', which='major', labelsize=12)
+
+plt.xticks(rotation=90)
+
+model_path = os.path.join(os.path.dirname(args.weights))
+
+plt.savefig(model_path + f"corr_matrix_par{args.parity}.png", dpi=300)
 
