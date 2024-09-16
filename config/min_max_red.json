@@ -27,13 +27,15 @@
         "min": 0.0,
         "max": 4000.0
     },
-    "sample_year": {
-    "min": 2016.0,
-    "max": 2018.0
+
+    "era_id": {
+        "min": 0.0,
+        "max": 4.0
     },
 
-    "channelId": {
+    "pairType": {
         "min": 0.0,
         "max": 2.0
     }
+
 }

@@ -253,7 +253,8 @@ inline int ToLegacySampleType(int new_sample_type)
     static const std::map<int, int> type_map = {
         { 1, 8 }, {2, 8}, 
         { 3, 9 }, {4, 9}, 
-        { 17, 6 }, 
+        { 17, 6 }, {31, 6}
+
     };
     auto iter = type_map.find(new_sample_type);
     if(iter == type_map.end())
@@ -277,17 +278,51 @@ inline int ToLegacyChannel(int new_channel)
 	return iter->second;
 }
 
+inline int ToPairType(int new_channel)
+{
+    static const std::map<int, int> channel_map = {
+        {13, 1}, //etau
+        {23, 0}, //mutau
+        {33, 2},//tautau
+        {11, -1},
+        {22, -1},
+        {12, -1}
+    };
+    auto iter = channel_map.find(new_channel);
+    if(iter == channel_map.end())
+        throw std::runtime_error("Unknown channel ID");
+    return iter->second;
+}
+
 inline int ToLegacyYear(int new_year)
 {
 	static const std::map<int, int> year_map = {
 		{2, 2016}, 
 		{3, 2017},
-		{4, 2018}
+		{4, 2018},
+        {5, 2022},
+        {6, 2022},
+        {7, 2023},
+        {8, 2023}
 	};
 	auto iter = year_map.find(new_year);
 	if(iter == year_map.end())
 		throw std::runtime_error("Unknown year");
 	return iter->second;
+}
+
+inline int ToEraId(int new_eraid)
+{
+    static const std::map<int, int> era_map = {
+        {5, 1},
+        {6, 2},
+        {7, 3},
+        {8, 4}
+    };
+    auto iter = era_map.find(new_eraid);
+    if(iter == era_map.end())
+        throw std::runtime_error("Unknown era");
+    return iter->second;
 }
 			
 
