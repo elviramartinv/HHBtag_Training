@@ -12,10 +12,8 @@ if not os.path.exists(output_dir):
 
 ROOT.gInterpreter.Declare(f'#include "../include/pyInterface.h"')
 
-# Cargar el archivo ROOT
 df = RDataFrame("Event", input)
 
-# Definir las nuevas columnas
 df = df.Define('n_jets', 'RecoJet_pt.size()') \
        .Define('htt_scalar_pt', 'HttCandidate_leg0_pt + HttCandidate_leg1_pt') \
        .Define('htt_p4', 'getHTTp4(HttCandidate_leg0_pt, HttCandidate_leg0_eta, HttCandidate_leg0_phi, HttCandidate_leg0_mass, HttCandidate_leg1_pt, HttCandidate_leg1_eta, HttCandidate_leg1_phi, HttCandidate_leg1_mass)') \
@@ -43,7 +41,6 @@ for tag in taggers:
            .Define(f'{tag}_lead_jet_{tag}', f'RecoJet_{tag}[{tag}_leading_jet_idx]') \
            .Define(f'{tag}_sublead_jet_{tag}', f'RecoJet_{tag}[{tag}_subleading_jet_idx]')
 
-# Dibujar las distribuciones
 variables = ["htt_pt", "htt_eta", "htt_met_dphi", "rel_met_pt_htt_pt", "htt_scalar_pt"]
 for tag in taggers:
     variables.extend([f"{tag}_lead_jet_valid", f"{tag}_lead_jet_pt", f"{tag}_lead_jet_eta", f"{tag}_lead_jet_phi", f"{tag}_lead_jet_M",
@@ -55,25 +52,20 @@ for var in variables:
     hist = df.Histo1D(var)
     hist.Draw()
     
-    # Encontrar el primer y último bin con datos
     first_bin = hist.FindFirstBinAbove(0)
     last_bin = hist.FindLastBinAbove(0)
     
-    # Obtener los límites de los bins
     x_min = hist.GetXaxis().GetBinLowEdge(first_bin)
     x_max = hist.GetXaxis().GetBinUpEdge(last_bin)
     
-    # Añadir un pequeño margen
     margin = (x_max - x_min) * 0.05
     x_min -= margin
     x_max += margin
     
-    # Ajustar los límites del eje x
     hist.GetXaxis().SetRangeUser(x_min, x_max)
     
     # canvas.SaveAs(f"{output_dir}/{var}_{input_file}.png")
 
-# Guardar los histogramas en un archivo
 output_file = ROOT.TFile(f"{output_dir}/histograms_{input_file}", "RECREATE")
 for var in variables:
     hist = df.Histo1D(var)
