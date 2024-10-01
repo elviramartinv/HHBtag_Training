@@ -10,15 +10,10 @@ initialized = False
 max_jet = 10
 
 class SampleType:
-    Data = 1
-    MC = 2
-    DY = 3
-    QCD = 4
-    TT = 5
-    ggHH_NonRes = 6
-    VBFHH_NonRes = 7
-    ggHH_Res = 8
-    VBFHH_Res = 9
+    ggHH_NonRes = 0
+    VBFHH_NonRes = 1
+    ggHH_Res = 2
+    VBFHH_Res = 3
 
 def FindFiles(path, pattern) :
     files = []
@@ -33,7 +28,7 @@ def FindFiles(path, pattern) :
         v.push_back(file)
     return v
 
-def DefineVariables(sample_name, parity, use_deepTau_ordering) :
+def DefineVariables(sample_name, parity) :
     global initialized
     if not initialized:
         file_dir = os.path.dirname(os.path.abspath(__file__))
@@ -54,7 +49,7 @@ def DefineVariables(sample_name, parity, use_deepTau_ordering) :
            .Define('node', 'node_index') \
            .Define('pairType', 'channel') \
         #    .Define('channelId', 'ToLegacyChannel(channel)') \
-    df = df.Define('sample_year', 'ToLegacyYear(period)')    
+    # df = df.Define('sample_year', 'ToLegacyYear(period)')    
     df = df.Define('era_id', 'ToEraId(period)')  
     df = df.Define('n_jets', 'RecoJet_pt.size()') \
            .Define('htt_scalar_pt', 'HttCandidate_leg0_pt + HttCandidate_leg1_pt') \
@@ -86,7 +81,7 @@ def DefineVariables(sample_name, parity, use_deepTau_ordering) :
     return df
 
 def CreateColums() :
-    evt_columns = [ 'sample_type', 'spin', 'mass_point', 'node', 'sample_year', 'era_id', 'pairType', 'htt_pt', 'htt_eta',
+    evt_columns = [ 'sample_type', 'spin', 'mass_point', 'node', 'era_id', 'pairType', 'htt_pt', 'htt_eta',
                     'n_jets', 'htt_scalar_pt', 'htt_met_dphi', 'rel_met_pt_htt_pt'
     ]
 
@@ -135,8 +130,8 @@ def CreateInputs(raw_data):
             data[:, jet_idx, jet_vars_idx[n]] = raw_data[all_vars[jet_vars_idx[n]].format(jet_idx)][:]
     return data
 
-def CreateRootDF(sample_name, parity, do_shuffle, use_deepTau_ordering):
-    df = DefineVariables(sample_name, parity, use_deepTau_ordering)
+def CreateRootDF(sample_name, parity, do_shuffle):
+    df = DefineVariables(sample_name, parity)
     evt_columns, jet_column, all_vars, jet_columns = CreateColums()
     data_raw = df.AsNumpy(columns=evt_columns+jet_columns)
     data = CreateInputs(data_raw)
@@ -188,3 +183,56 @@ def CreateXY(data, training_variables):
             X[:, jet_idx, var_idx] = X[:, jet_idx, var_idx] * X[:, jet_idx, valid_pos]
 
     return X, Y, Z, var_pos, var_pos_z, var_name
+
+# ### to test
+# def PlotHistograms(data_raw):
+#     evt_columns, jet_column, all_vars, jet_columns = CreateColums()
+    
+#     for var in evt_columns:
+#         plt.figure()
+#         plt.hist(data_raw[var], bins=50, alpha=0.75)
+#         plt.title(f'Histogram of {var}')
+#         plt.xlabel(var)
+#         plt.ylabel('Events')
+#         plt.grid(True)
+#         plt.savefig(f'output_variables/{var}.png')
+    
+#     for jet_var in jet_columns:
+#         plt.figure()
+#         plt.hist(data_raw[jet_var], bins=50, alpha=0.75)
+#         plt.title(f'Histogram of {jet_var}')
+#         plt.xlabel(jet_var)
+#         plt.ylabel('Events')
+#         plt.grid(True)
+#         plt.savefig(f'output_variables/{var}.png')
+
+# df = CreateRootDF(sample_name, parity, do_shuffle)
+# PlotHistograms(df.AsNumpy(columns=all_vars))
+
+
+# def SaveHistogramsToRoot(data_raw, output_filename='histograms.root'):
+#     root_file = ROOT.TFile(output_filename, 'RECREATE')
+    
+#     evt_columns, jet_column, all_vars, jet_columns = CreateColums()
+    
+#     for var in evt_columns:
+#         values = data_raw[var]
+#         hist = ROOT.TH1F(f'hist_{var}', f'Histogram of {var}', 50, min(values), max(values))
+#         for value in values:
+#             hist.Fill(value)
+#         hist.Write()
+
+#     for jet_var in jet_columns:
+#         values = data_raw[jet_var]
+#         hist = ROOT.TH1F(f'hist_{jet_var}', f'Histogram of {jet_var}', 50, min(values), max(values))
+#         for value in values:
+#             hist.Fill(value)
+#         hist.Write()
+    
+#     root_file.Close()
+
+#     print(f"Histograms saved to {output_filename}")
+
+# df = CreateRootDF(sample_name, parity, do_shuffle)
+# data_raw = df.AsNumpy(columns=evt_columns + jet_columns)
+# SaveHistogramsToRoot(data_raw, 'output_histograms.root')

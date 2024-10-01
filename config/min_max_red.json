@@ -30,12 +30,12 @@
 
     "era_id": {
         "min": 0.0,
-        "max": 4.0
+        "max": 3.0
     },
 
     "pairType": {
         "min": 0.0,
-        "max": 2.0
+        "max": 5.0
     }
 
 }

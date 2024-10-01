@@ -251,9 +251,9 @@ float httDeltaEta_jet (const LorentzVectorM& htt_p4, const ROOT::VecOps::RVec<si
 inline int ToLegacySampleType(int new_sample_type)
 {
     static const std::map<int, int> type_map = {
-        { 1, 8 }, {2, 8}, 
-        { 3, 9 }, {4, 9}, 
-        { 17, 6 }, {31, 6}
+        { 1, 2 }, {2, 2}, 
+        { 3, 3 }, {4, 3}, 
+        { 17, 0 }, {31, 1}
 
     };
     auto iter = type_map.find(new_sample_type);
@@ -314,10 +314,10 @@ inline int ToLegacyYear(int new_year)
 inline int ToEraId(int new_eraid)
 {
     static const std::map<int, int> era_map = {
-        {5, 1},
-        {6, 2},
-        {7, 3},
-        {8, 4}
+        {5, 0},
+        {6, 1},
+        {7, 2},
+        {8, 3}
     };
     auto iter = era_map.find(new_eraid);
     if(iter == era_map.end())
