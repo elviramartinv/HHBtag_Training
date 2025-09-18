@@ -1,0 +1,14 @@
+{
+    "rel_jet_{}_M_pt": {
+        "mean": 0.113,
+        "std": 0.050
+    },
+    "rel_jet_{}_E_pt": {
+        "mean": 4.144,
+        "std": 6.875
+    },
+    "rel_met_pt_htt_pt": {
+        "mean": 0.7258,
+        "std": 0.6221
+    }
+}

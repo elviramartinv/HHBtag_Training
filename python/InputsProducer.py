@@ -28,7 +28,7 @@ def FindFiles(path, pattern) :
         v.push_back(file)
     return v
 
-def DefineVariables(sample_name, parity) :
+def DefineVariables(sample_name, parity, use_deepTau_ordering) :
     global initialized
     if not initialized:
         file_dir = os.path.dirname(os.path.abspath(__file__))
@@ -56,8 +56,8 @@ def DefineVariables(sample_name, parity) :
            .Define('htt_p4', 'getHTTp4(HttCandidate_leg0_pt, HttCandidate_leg0_eta, HttCandidate_leg0_phi, HttCandidate_leg0_mass,HttCandidate_leg1_pt, HttCandidate_leg1_eta, HttCandidate_leg1_phi, HttCandidate_leg1_mass)') \
            .Define('htt_pt', 'htt_p4.pt()') \
            .Define('htt_eta', 'htt_p4.eta()') \
-           .Define('rel_met_pt_htt_pt', 'MET_pt / htt_scalar_pt') \
-           .Define('htt_met_dphi', 'TVector2::Phi_mpi_pi(MET_phi - htt_p4.phi())') \
+           .Define('rel_met_pt_htt_pt', 'PuppiMET_pt / htt_scalar_pt') \
+           .Define('htt_met_dphi', 'TVector2::Phi_mpi_pi(PuppiMET_phi - htt_p4.phi())') \
            # .Define('jets_genbJet', 'MakeGenbJet(jets_genJetIndex, jets_deepFlavourOrderedIndex)') \
            # .Filter('std::accumulate(jets_genbJet.begin(), jets_genbJet.end(), 0) == 2')
 
@@ -73,7 +73,6 @@ def DefineVariables(sample_name, parity) :
                .Define(f'jet_{jet_idx}_genbJet', f'jet_{jet_idx}_valid ? RecoJet_genMatched.at({jet_idx}) : 0.f') \
                .Define(f'jet_{jet_idx}_deepFlavour', f'jet_{jet_idx}_valid ? RecoJet_btagDeepFlavB.at({jet_idx}) : 0.f') \
                .Define(f'jet_{jet_idx}_ParticleNet', f'jet_{jet_idx}_valid ? RecoJet_btagPNetB.at({jet_idx}) : 0.f') \
-               .Define(f'jet_{jet_idx}_RobustPar', f'jet_{jet_idx}_valid ? RecoJet_btagRobustParTAK4B.at({jet_idx}) : 0.f') \
                .Define(f'jet_{jet_idx}_htt_dphi', f'jet_{jet_idx}_valid ? ROOT::Math::VectorUtil::DeltaPhi(htt_p4, jet_{jet_idx}_p4) : 0.f') \
                .Define(f'jet_{jet_idx}_htt_deta', f'jet_{jet_idx}_valid ? (htt_p4.eta()-jet_{jet_idx}_p4.eta()) : 0.f')
                 # .Define(f'jet_{jet_idx}_deepCSV'.format(n_jet), 'jets_deepCSV(jets_deepCsv_BvsAll, jets_deepFlavourOrderedIndex, {})'.format(n_jet)) \
@@ -86,7 +85,7 @@ def CreateColums() :
     ]
 
     jet_column = [ 'jet_{}_valid', 'jet_{}_pt', 'jet_{}_eta', 'jet_{}_E', 'jet_{}_M', 'rel_jet_{}_M_pt', 'rel_jet_{}_E_pt',
-                   'jet_{}_htt_deta', 'jet_{}_deepFlavour', 'jet_{}_ParticleNet', 'jet_{}_RobustPar', 'jet_{}_htt_dphi', 'jet_{}_genbJet',
+                   'jet_{}_htt_deta', 'jet_{}_deepFlavour', 'jet_{}_ParticleNet', 'jet_{}_htt_dphi', 'jet_{}_genbJet',
     ]
 
     all_vars = evt_columns + jet_column
@@ -130,8 +129,8 @@ def CreateInputs(raw_data):
             data[:, jet_idx, jet_vars_idx[n]] = raw_data[all_vars[jet_vars_idx[n]].format(jet_idx)][:]
     return data
 
-def CreateRootDF(sample_name, parity, do_shuffle):
-    df = DefineVariables(sample_name, parity)
+def CreateRootDF(sample_name, parity, do_shuffle, use_deepTau_ordering):
+    df = DefineVariables(sample_name, parity, use_deepTau_ordering)
     evt_columns, jet_column, all_vars, jet_columns = CreateColums()
     data_raw = df.AsNumpy(columns=evt_columns+jet_columns)
     data = CreateInputs(data_raw)
@@ -183,56 +182,3 @@ def CreateXY(data, training_variables):
             X[:, jet_idx, var_idx] = X[:, jet_idx, var_idx] * X[:, jet_idx, valid_pos]
 
     return X, Y, Z, var_pos, var_pos_z, var_name
-
-# ### to test
-# def PlotHistograms(data_raw):
-#     evt_columns, jet_column, all_vars, jet_columns = CreateColums()
-    
-#     for var in evt_columns:
-#         plt.figure()
-#         plt.hist(data_raw[var], bins=50, alpha=0.75)
-#         plt.title(f'Histogram of {var}')
-#         plt.xlabel(var)
-#         plt.ylabel('Events')
-#         plt.grid(True)
-#         plt.savefig(f'output_variables/{var}.png')
-    
-#     for jet_var in jet_columns:
-#         plt.figure()
-#         plt.hist(data_raw[jet_var], bins=50, alpha=0.75)
-#         plt.title(f'Histogram of {jet_var}')
-#         plt.xlabel(jet_var)
-#         plt.ylabel('Events')
-#         plt.grid(True)
-#         plt.savefig(f'output_variables/{var}.png')
-
-# df = CreateRootDF(sample_name, parity, do_shuffle)
-# PlotHistograms(df.AsNumpy(columns=all_vars))
-
-
-# def SaveHistogramsToRoot(data_raw, output_filename='histograms.root'):
-#     root_file = ROOT.TFile(output_filename, 'RECREATE')
-    
-#     evt_columns, jet_column, all_vars, jet_columns = CreateColums()
-    
-#     for var in evt_columns:
-#         values = data_raw[var]
-#         hist = ROOT.TH1F(f'hist_{var}', f'Histogram of {var}', 50, min(values), max(values))
-#         for value in values:
-#             hist.Fill(value)
-#         hist.Write()
-
-#     for jet_var in jet_columns:
-#         values = data_raw[jet_var]
-#         hist = ROOT.TH1F(f'hist_{jet_var}', f'Histogram of {jet_var}', 50, min(values), max(values))
-#         for value in values:
-#             hist.Fill(value)
-#         hist.Write()
-    
-#     root_file.Close()
-
-#     print(f"Histograms saved to {output_filename}")
-
-# df = CreateRootDF(sample_name, parity, do_shuffle)
-# data_raw = df.AsNumpy(columns=evt_columns + jet_columns)
-# SaveHistogramsToRoot(data_raw, 'output_histograms.root')

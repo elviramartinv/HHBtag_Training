@@ -1,0 +1,217 @@
+import os
+import pandas as pd
+import numpy as np
+import numba
+from scipy import interpolate
+
+from InputsProducer import SampleType as st
+
+ggHH_NonRes = st.ggHH_NonRes 
+VBFHH_NonRes = st.VBFHH_NonRes
+ggHH_Res = st.ggHH_Res
+VBFHH_Res = st.VBFHH_Res 
+
+@numba.njit
+def calculeteNEvents(X, Z):
+    mass_node = np.where(Z[:, 0, 3] == -1, Z[:, 0, 2], Z[:, 0, 3])
+    mass_node_unique = np.unique(mass_node)
+    counts = np.zeros((4,6,4,2,len(mass_node_unique)))
+
+    for n in range(X.shape[0]):
+        year = int(Z[n, 0, -2])#var_pos['era_id']]
+        channel = int(Z[n, 0, -1])#var_pos['pairType']]
+        sample_type = int(Z[n,0,0])
+        spin = int(Z[n,0, 1] > 0)
+        mn = mass_node[n]
+        mn_index = np.argmax(mass_node_unique == mn)
+        # channel_idx = channel 
+        counts[year, channel, sample_type, spin,  mn_index] +=1
+    weights = np.where(counts > 0, 1. / counts, 0)
+    return counts, weights, mass_node_unique, mass_node
+
+def CreateXSTable(X, Z, radion_xs, radion_br, vbf_radion_xs, graviton_xs, graviton_br, vbf_graviton_xs):
+
+    counts, weights, mass_node_unique, mass_node = calculeteNEvents(X, Z)
+
+    df_xs_radion = pd.read_table(radion_xs)
+    df_xs_vbf_radion = pd.read_table(vbf_radion_xs)
+    df_br_radion = pd.read_table(radion_br)
+
+    df_xs_graviton = pd.read_table(graviton_xs)
+    df_xs_vbf_graviton = pd.read_table(vbf_graviton_xs)
+    df_br_graviton = pd.read_table(graviton_br)
+
+    f_br_radion = interpolate.interp1d(df_br_radion['mR(GeV)'], df_br_radion['hh'], kind='cubic')
+    f_xs_radion = interpolate.interp1d(df_xs_radion['mH(GeV)'], df_xs_radion['CrossSection(pb)'], kind='cubic')
+    f_xs_vbf_radion = interpolate.interp1d(df_xs_vbf_radion['mH(GeV)'], df_xs_vbf_radion['CrossSection(pb)'], kind='cubic')
+
+    f_br_graviton = interpolate.interp1d(df_br_graviton['mG(GeV)'], df_br_graviton['hh'], kind='cubic')
+    f_xs_graviton = interpolate.interp1d(df_xs_graviton['mG(GeV)'], df_xs_graviton['XS(pb)'], kind='cubic')
+    f_xs_vbf_graviton = interpolate.interp1d(df_xs_vbf_graviton['mG(GeV)'], df_xs_vbf_graviton['XS(pb)'], kind='cubic')
+
+    xs_all = np.ones((4,2,len(mass_node_unique)))
+    indices = mass_node_unique >= 250
+    res_masses = np.copy(mass_node_unique[indices])
+    if len(res_masses) > 0 and res_masses[0] == 250 :
+        res_masses[0] = 251
+
+    xs_radion = f_xs_radion(res_masses)
+    xs_vbf_radion = f_xs_vbf_radion(res_masses)
+    br_radion = f_br_radion(res_masses)
+
+    xs_graviton = f_xs_graviton(res_masses)
+    xs_vbf_graviton = f_xs_vbf_graviton(res_masses)
+    br_graviton = f_br_graviton(res_masses)
+
+    xs_all[ggHH_Res,0, indices] = xs_radion * br_radion
+    xs_all[VBFHH_Res,0, indices] = xs_vbf_radion * br_radion
+
+    xs_all[ggHH_Res,1, indices] = xs_graviton * br_graviton
+    xs_all[VBFHH_Res,1, indices] = xs_vbf_graviton * br_graviton
+
+    return xs_all, counts, weights, mass_node_unique, mass_node
+
+def CreateWeights(X, Z):
+    file_dir = os.path.dirname(os.path.abspath(__file__))
+    base_dir = os.path.dirname(file_dir)
+    xs_br_dir = os.path.join(base_dir, 'config', 'xs_br')
+    xs_all, counts, weights, mass_node_unique, mass_node = CreateXSTable(X, Z,
+        os.path.join(xs_br_dir, 'radion_ggF_xs.csv'),
+        os.path.join(xs_br_dir, 'radion_br.csv'),
+        os.path.join(xs_br_dir, 'radion_VBF_xs.csv'),
+        os.path.join(xs_br_dir, 'graviton_ggF_xs.csv'),
+        os.path.join(xs_br_dir, 'graviton_br.csv'),
+        os.path.join(xs_br_dir, 'graviton_VBF_xs.csv'))
+
+    for sample_type in range(4):
+        for spin in range(2):
+            for mass in range(xs_all.shape[2]):
+                weights[:,:,sample_type,spin,mass] *= xs_all[sample_type, spin, mass]
+
+    # Radion = Graviton
+    indices = mass_node_unique >= 250
+    res_process = [ggHH_Res, VBFHH_Res]
+    non_res_process = [ggHH_NonRes, VBFHH_NonRes]
+    all_process = [res_process, non_res_process]
+    for year in range(4):
+        for channel in range(6):
+            for prod_mode in res_process:
+                radion = np.sum(weights[year, channel, prod_mode, 0, :] * counts[year, channel, prod_mode, 0, :])
+                graviton = np.sum(weights[year, channel, prod_mode, 1, :] * counts[year, channel, prod_mode, 1, :])
+                if radion == 0 or graviton == 0: continue
+                C = radion / graviton
+                print(f'CreateWeights: Radion = Graviton year={year} channel={channel} prod_mode={prod_mode} factor={C}')
+                weights[year, channel, prod_mode, 1, :] *= C
+
+    # VBF = ggF
+    for year in range(4):
+        for channel in range(6):
+            for x in all_process:
+                VBF = np.sum(weights[year, channel, x[1], :, :] * counts[year, channel, x[1], :, :])
+                ggF = np.sum(weights[year, channel,  x[0], :, :] * counts[year, channel,  x[0], :, :])
+                if VBF == 0 or ggF == 0: continue
+                E = VBF / ggF
+                print(f'CreateWeights: VBF = ggF year={year} channel={channel} proc={x} factor={E}')
+                weights[year, channel, x[0], :, :] *= E
+
+    # Res = Non Res
+    for year in range(4):
+        for channel in range(6):
+            non_res = np.sum(weights[year, channel, non_res_process, :, :] * counts[year, channel, non_res_process, :, :])
+            res = np.sum(weights[year, channel, res_process, :, :] * counts[year, channel, res_process, :, :])
+            if non_res == 0 or res == 0: continue
+            D = non_res / res
+            print(f'CreateWeights: Res = Non Res year={year} channel={channel} factor={D}')
+            weights[year, channel, res_process, :, :] *= D
+
+    # eTau = muTau = tauTau // ee / emu / mumu ?
+    for year in range(4):
+        ch_cnt = np.zeros(6)
+        for channel in range(6):
+            ch_cnt[channel] = np.sum(weights[year, channel, :, :, :] * counts[year, channel, :, :, :])
+
+        ref_ch = np.amax(ch_cnt)
+        if ref_ch == 0: continue
+        print(f'CreateWeights: ch_cnt =  {ch_cnt}')
+        for channel in range(6):
+            if ch_cnt[channel] != 0 :
+                A = ref_ch / ch_cnt[channel]
+                print(f'CreateWeights: eTau = muTau = tauTau year={year} channel={channel} factor={A}')
+                weights[year, channel, :, :, :] *= A
+
+    # all years
+    #https://twiki.cern.ch/twiki/bin/viewauth/CMS/TWikiLUM
+    luminosity = [8.077, 26.672, 18.411, 9.451]
+    year_cnt = np.zeros(4)
+    for year in range(4):
+         year_cnt[year] = np.sum(weights[year, :, :, :, :] * counts[year, :, :, :, :])
+
+    for year in range(4):
+        if year_cnt[year] != 0 :
+            A = luminosity[year] / year_cnt[year]
+            print(f'CreateWeights: all years year={year} factor={A}')
+            weights[year, :, :, :, :] *= A
+
+    #sum all = n_evt
+    weights_count = np.sum(weights * counts)
+    C =  X.shape[0] / weights_count
+    print(f'CreateWeights: final factor = {C}')
+    weights *= C
+
+    return weights, mass_node_unique, mass_node
+
+@numba.njit
+def ConvertToVector(X,Z, weights, mass_node_unique, mass_node):
+    weight_vec = np.zeros(X.shape[0])
+    for n in range(X.shape[0]):
+        year = int(Z[n, 0, -2])
+        channel = int(Z[n, 0, -1])
+        sample_type = int(Z[n,0,0])
+        spin = int(Z[n,0, 1] > 0)
+        mn = mass_node[n]
+        mn_index = np.argmax(mass_node_unique == mn)
+        weight_vec[n] = weights[year, channel, sample_type, spin,  mn_index]
+    return weight_vec
+
+def CreateSampleWeigts(X,Z):
+    weights, mass_node_unique, mass_node = CreateWeights(X, Z)
+    return ConvertToVector(X,Z, weights, mass_node_unique, mass_node)
+
+@numba.njit
+def CrossCheckWeights(Z, X, w, g_r, res_non_res, check_channel, year):
+    w_1 = []
+    w_2 = []
+    w_3 = []
+    w_4 = []
+    w_5 = []
+    w_6 = []
+    if res_non_res == True:
+        for n in range(X.shape[0]):
+            if (Z[n, 0, 0] == 0 or Z[n, 0, 0] == 1) and Z[n, 0, -2] == year :
+                w_1.append(w[n])
+            elif (Z[n, 0, 0] == 2 or Z[n, 0, 0] == 3) and Z[n, 0, -2] == year :
+                w_2.append(w[n])
+
+    elif g_r == True:
+        for n in range(X.shape[0]):
+            if Z[n, 0, 1] == 0 and Z[n, 0, -2] == year:
+                w_1.append(w[n])
+            elif Z[n, 0, 1] == 2 and Z[n, 0, -2] == year:
+                w_2.append(w[n])
+
+    elif check_channel == True:
+        for n in range(X.shape[0]):
+            if Z[n, 0, -1] == 0 and Z[n, 0, -2] == year:
+                w_1.append(w[n])
+            elif Z[n, 0, -1] == 1 and Z[n, 0, -2] == year:
+                w_2.append(w[n])
+            elif Z[n, 0, -1] == 2 and Z[n, 0, -2] == year:
+                w_3.append(w[n])
+            elif Z[n, 0, -1] == 3 and Z[n, 0, -2] == year:
+                w_4.append(w[n])
+            elif Z[n, 0, -1] == 4 and Z[n, 0, -2] == year:
+                w_5.append(w[n])
+            elif Z[n, 0, -1] == 5 and Z[n, 0, -2] == year:
+                w_6.append(w[n])
+
+    return np.sum(np.array(w_1)), np.sum(np.array(w_2)), np.sum(np.array(w_3)), np.sum(np.array(w_4)), np.sum(np.array(w_5)), np.sum(np.array(w_6))

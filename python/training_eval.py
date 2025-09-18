@@ -7,7 +7,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 
-import InputsProducer as InputsProducer
 import ParametrizedModel as pm
 
 

@@ -14,25 +14,39 @@ from Apply import ApplyTraining
 
 # ggf and VBF res
 # masses = [250, 260, 270, 280, 300, 320, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 900, 1000, 1250, 1500, 2000, 2500, 3000]
-masses = [250, 260, 280, 300, 320, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 900, 1000, 1500, 3000]
+# masses = [250, 260, 280, 300, 320, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 900, 1000, 1500, 3000]
 #ggf non res
 # masses = ['SM', 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
-# masses = ['SM']
-#masses = [250,300,500]
+# masses = ['2022_GluGlutoHHto2B2Tau_SM', '2022_VBFtoHHto2B2Tau_SM', 
+#           '2022EE_GluGlutoHHto2B2Tau_SM', '2022EE_VBFtoHHto2B2Tau_SM',
+#           '2023_GluGlutoHHto2B2Tau_SM',  
+#           '2023BPix_GluGlutoHHto2B2Tau_SM']
+
+# masses = ['2022_GluGlutoHHto2B2Tau_SM', '2022_GluGlutoHHto2B2Tau_box', '2022_GluGlutoHHto2B2Tau_6', '2022_GluGlutoHHto2B2Tau_7', '2022_VBFHHto2B2Tau_SM', '2022_VBFHHto2B2Tau_1',
+#           '2022EE_GluGlutoHHto2B2Tau_SM', '2022EE_GluGlutoHHto2B2Tau_box', '2022EE_GluGlutoHHto2B2Tau_6', '2022EE_GluGlutoHHto2B2Tau_7', '2022EE_VBFHHto2B2Tau_SM', '2022EE_VBFHHto2B2Tau_1',
+#           '2023_GluGlutoHHto2B2Tau_SM', '2023_GluGlutoHHto2B2Tau_box', '2023_GluGlutoHHto2B2Tau_6', '2023_GluGlutoHHto2B2Tau_7', '2023_VBFHHto2B2Tau_SM', '2023_VBFHHto2B2Tau_1',
+#           '2023BPix_GluGlutoHHto2B2Tau_SM', '2023BPix_GluGlutoHHto2B2Tau_box', '2023BPix_GluGlutoHHto2B2Tau_6', '2023BPix_GluGlutoHHto2B2Tau_7', '2023BPix_VBFHHto2B2Tau_SM', '2023BPix_VBFHHto2B2Tau_1']
+masses = ['2022_GluGlutoHHto2B2Tau_SM', '2022_GluGlutoHHto2B2Tau_box', '2022_GluGlutoHHto2B2Tau_6', '2022_GluGlutoHHto2B2Tau_7', '2022_VBFtoHH2B2Tau_SM', '2022_VBFtoHH2B2Tau_1']
+# masses = ['2022EE_GluGlutoHHto2B2Tau_SM', '2022EE_GluGlutoHHto2B2Tau_box', '2022EE_GluGlutoHHto2B2Tau_6', '2022EE_GluGlutoHHto2B2Tau_7', '2022EE_VBFHHto2B2Tau_SM', '2022EE_VBFHHto2B2Tau_1']
+# masses = ['2023_GluGlutoHHto2B2Tau_SM', '2023_GluGlutoHHto2B2Tau_box', '2023_GluGlutoHHto2B2Tau_6', '2023_GluGlutoHHto2B2Tau_7', '2023_VBFHHto2B2Tau_SM', '2023_VBFHHto2B2Tau_1']
+# masses = ['2023BPix_GluGlutoHHto2B2Tau_SM', '2023BPix_GluGlutoHHto2B2Tau_box', '2023BPix_GluGlutoHHto2B2Tau_6', '2023BPix_GluGlutoHHto2B2Tau_7', '2023BPix_VBFHHto2B2Tau_SM', '2023BPix_VBFHHto2B2Tau_1']
 #VBF non res
+
 
 # path = "/afs/cern.ch/user/e/emartinv/public/Ntuple_prod/training_ntuples/GluGluToBulkGravitonToHHTo2B2Tau_M-"
 # path = "/afs/cern.ch/user/e/emartinv/public/Ntuple_prod/training_ntuples/GluGluToRadionToHHTo2B2Tau_M-"
 # path = "/afs/cern.ch/user/e/emartinv/public/Ntuple_prod/training_ntuples/VBFToBulkGravitonToHHTo2B2Tau_M-"
 # path = "/afs/cern.ch/user/e/emartinv/public/Ntuple_prod/training_ntuples/VBFToRadionToHHTo2B2Tau_M-"
-path = "/afs/cern.ch/user/e/emartinv/public/training_ntuples_RunII/2016_VBFToBulkGravitonToHHTo2B2Tau_M-" 
+path = "/eos/user/e/emartinv/HHBtag_Training/training_skims_Run3_0109/" 
+# path = "/afs/cern.ch/user/e/emartinv/public/hhbtag_skims_fw/output_v2/"
 
-taggers = ["particleNetAK4_B", "HHBtagScore", "btagDeepFlavB"]
+# taggers = ["btagPNetB", "btagRobustParTAK4B", "btagDeepFlavB"]
+taggers = ["btagPNetB"]
 results = {}
 results_hhbtag = {}
 error_results_hhbtag = {}
 
-training_variables = '../config/training_variables.json'
+training_variables = '../config/training_variables.json' ######change this every time we change the training variables
 params_json = '../config/params_optimized_training.json'
 
 applier = ApplyTraining(params_json, '../config/mean_std_red.json', '../config/min_max_red.json', training_variables)
@@ -59,9 +73,25 @@ for mass in masses:
         
         results_hhbtag[parity] = {}
         error_results_hhbtag[parity] = {}
-        weights = f'test_24Jan_par{abs(parity-1)}/model'
+        # weights = f'model_PNet_2910_par{abs(parity-1)}/model'
+        # weights = f'model_v2.0_par{abs(parity-1)}/model'
+        weights = f'HHBTag_PNet_trueb_0309_par{abs(parity-1)}/model'
+        df = ROOT.RDataFrame("Event", file)
+        # df = df.Filter("RecoJet_pt.size()>=2")
+        # df = df.Filter('channel == 0 || channel == 1 || channel == 2')
         
         newHH_pred, genMatched, events, cpp_scores = applier.apply(file, weights, parity)
+
+
+        # channel = df.AsNumpy(columns=["channel"])
+        # mutau_indices = np.where(channel["channel"] == 5)
+
+        # newHH_pred = newHH_pred[mutau_indices]
+        # genMatched = genMatched[mutau_indices]
+        # events = events[mutau_indices]
+        # cpp_scores = cpp_scores[mutau_indices]
+
+
         newHH_sorted = np.argsort(-newHH_pred)
         newHH_nMatched = count_matched(newHH_sorted, genMatched)
         purity = float(newHH_nMatched) / newHH_pred.shape[0]
@@ -116,11 +146,11 @@ for mass in masses:
     # with uproot.recreate(outFile, compression=uproot.LZMA(9)) as out_file:
     #     out_file["Events"] = data
         
-        # {
-        #     'HHbtag': newHH_pred,
-        #     'HHbtag_cpp': cpp_scores,
-        #     'event': events
-        # }
+    #     {
+    #         'HHbtag': newHH_pred,
+    #         'HHbtag_cpp': cpp_scores,
+    #         'event': events
+    #     }
 
 
 
@@ -128,7 +158,9 @@ for mass in masses:
     # raise RuntimeError("stop")
 
     df = ROOT.RDataFrame("Event", file)
-    df = df.Filter("RecoJet_pt.size()>=2")   
+    df = df.Filter("RecoJet_pt.size()>=2")  
+    # df = df.Filter('channel == 0 || channel == 1 || channel == 2')
+
     # df = df.Define("Htt_mass", "np.sqrt(2 * HttCandidate_leg0_pt * HttCandidate_leg1_pt * (np.cosh(HttCandidate_leg0_eta - HttCandidate_leg1_pt) - np.cos(HttCandidate_leg0_phi - HttCandidate_leg1_phi))")
     
     # df = df.Define('Hbb_mass', 'HttCandidate_leg0_pt + httCandidate_leg1_pt')
@@ -154,18 +186,21 @@ for mass in masses:
             'err': (purity - lower, upper-purity)
         }      
     results[mass] = file_results
-    #print("results", results[mass])
+    # print("results", results[mass])
 
-with open("output/test_24Jan/json/2016_vbf_spin2.json", "w") as json_file:
+with open("output/Run3_purities/json/HHBTag_v3.0109_2022.json", "w") as json_file:
     json.dump(results, json_file)
 
+raise RuntimeError("stop")
 
-particleNet_purities = [result["particleNetAK4_B"]["purity"] for result in results.values()]
-particleNet_err = [result["particleNetAK4_B"]["err"] for result in results.values()]
+particleNet_purities = [result["btagPNetB"]["purity"] for result in results.values()]
+particleNet_err = [result["btagPNetB"]["err"] for result in results.values()]
 deepFlav_purities = [result["btagDeepFlavB"]["purity"] for result in results.values()]
 deepFlav_err = [result["btagDeepFlavB"]["err"] for result in results.values()]
-HHBtag_purities = [result["HHBtagScore"]["purity"] for result in results.values()]
-HHBtag_err = [result["HHBtagScore"]["err"] for result in results.values()]
+RobustPar_purities = [result["btagRobustParTAK4B"]["purity"] for result in results.values()]
+RobustPar_err = [result["btagRobustParTAK4B"]["err"] for result in results.values()]
+# HHBtag_purities = [result["HHBtagScore_v2"]["purity"] for result in results.values()]
+# HHBtag_err = [result["HHBtagScore_v2"]["err"] for result in results.values()]
 newHHbtag_purities = [result["newHHBtag"] for result in results.values()]
 newHHbtag_err = [result["newHHBtag_err"] for result in results.values()]
 
@@ -178,22 +213,29 @@ ay = plt.gca()
 ay.errorbar(xtick_locations, particleNet_purities, yerr=np.array(particleNet_err).T, fmt='o', color='green', label='ParticleNet')
 # plt.scatter(xtick_locations, deepFlav_purities, marker='o', color='orange', label='DeepFlav')
 ay.errorbar(xtick_locations, deepFlav_purities, yerr=np.array(deepFlav_err).T, fmt='o', color='orange', label='DeepFlav')
+# plt.scatter(xtick_locations, RobustPar_purities, marker='o', color='blue', label='RobustPar')
+ay.errorbar(xtick_locations, RobustPar_purities, yerr=np.array(RobustPar_err).T, fmt='o', color='blue', label='RobustPar')
 #plt.scatter(xtick_locations, HHBtag_purities, marker='o', color='red', label='HHBtag')
-ay.errorbar(xtick_locations, HHBtag_purities, yerr=np.array(HHBtag_err).T, fmt='o', color='red', label='oldHHBtag')
+# ay.errorbar(xtick_locations, HHBtag_purities, yerr=np.array(HHBtag_err).T, fmt='o', color='red', label='HHBtag v3')
 #ay.scatter(xtick_locations,newHHbtag_purities, marker='o', color='black', label='newHHBtag')
-ay.errorbar(xtick_locations, newHHbtag_purities, yerr=np.array(newHHbtag_err).T, fmt='o', color='black', label='newHHBtag')
+ay.errorbar(xtick_locations, newHHbtag_purities, yerr=np.array(newHHbtag_err).T, fmt='o', color='black', label='new HHBtag')
 
 plt.xticks(xtick_locations, masses, rotation=45)
 
-plt.xlabel('mX [GeV]')
-plt.ylabel('Purity')
-plt.title('VBF spin2')
+# plt.ylim(0.9500, 0.9900)
+
+# yticks = np.arange(0.9500, 0.9900 + 0.0025, 0.0025)  
+# plt.yticks(yticks)
+
+plt.xlabel('signal sample', fontsize=14)
+plt.ylabel('Purity', fontsize=14)
+plt.title('2022preEE', fontsize=14)
 plt.legend()
 # plt.grid()
 plt.tight_layout()
 
-plt.savefig('output/test_24Jan/vbf_spin2_2016.pdf')
-#plt.savefig('purity_ggF_nonres.png', dpi=300)
+plt.savefig('output/Run3_purities/2910_2022.pdf')
+plt.savefig('output/Run3_purities/2910_2022.png', dpi=300)
 
 
 #plt.show()

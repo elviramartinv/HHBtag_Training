@@ -9,13 +9,13 @@ import json
 import os
 
 
-var_par = ['channelId', 'sample_year', 'rel_met_pt_htt_pt', 'htt_scalar_pt', 'htt_eta', 
+var_par = ['pairType', 'era_id', 'rel_met_pt_htt_pt', 'htt_scalar_pt', 'htt_eta', 
 'htt_met_dphi', 'htt_pt', 'rel_jet_M_pt', 'jet_htt_deta',
-'jet_eta', 'jet_pt', 'jet_htt_dphi',  'rel_jet_E_pt', 'jet_deepFlavour']
+'jet_eta', 'jet_pt', 'jet_htt_dphi',  'rel_jet_E_pt', 'jet_ParticleNet', 'jet_isbjet']
 
 var_mapping = {
-    'channelId': 'channelId',
-    'sample_year': 'sample_year',
+    'pairType': 'pairType',
+    'era_id': 'era_id',
     'rel_met_pt_htt_pt': 'rel_met_pt_htt_pt',
     'htt_scalar_pt': 'htt_scalar_pt',
     'htt_eta': 'htt_eta',
@@ -27,7 +27,8 @@ var_mapping = {
     'jet_pt': 'jet_{}_pt',
     'jet_htt_dphi': 'jet_{}_htt_dphi',
     'rel_jet_E_pt': 'rel_jet_{}_E_pt',
-    'jet_deepFlavour': 'jet_{}_deepFlavour'
+    'jet_ParticleNet': 'jet_{}_ParticleNet',
+    'jet_isbjet': 'jet_{}_isbjet'
 }
 
 parser = argparse.ArgumentParser()
@@ -78,15 +79,16 @@ ax.set_ylabel('Feature')
 
 ax.legend((p1[0], p2[0]), ('train with parity even', 'train with parity odd'))
 ax.set_yticks(range(len(var_score_par1)))
-ax.set_yticklabels(('channelId', 'sample_year', 'rel_met_pt_htt_pt', 'htt_scalar_pt', 'htt_eta', 
+ax.set_yticklabels(('pairType', 'era_id', 'rel_met_pt_htt_pt', 'htt_scalar_pt', 'htt_eta', 
 'htt_met_dphi', 'htt_pt', 'rel_jet_M_pt', 'jet_htt_deta', 
-'jet_eta', 'jet_pt', 'jet_htt_dphi', 'rel_jet_E_pt', 'jet_deepFlavour'))
+'jet_eta', 'jet_pt', 'jet_htt_dphi', 'rel_jet_E_pt', 'jet_ParticleNet', 'jet_isbjet'))
 #ax.set_yticklabels(('rel_met_pt_htt_pt', 'htt_scalar_pt', 'htt_eta', 'htt_met_dphi', 'htt_pt', 'jet_htt_deta', 'rel_jet_M_pt', 'rel_jet_E_pt',  'jet_pt',
-     #  'jet_htt_dphi', 'jet_eta', 'jet_deepFlavour'))
+     #  'jet_htt_dphi', 'jet_eta', 'jet_ParticleNet'))
 plt.xlabel("Importance via feature permutation")
 
 ax.autoscale_view()
-plt.savefig("output/feat_importance_" + args.model + "_GGF_2022.png", dpi=300, bbox_inches='tight')
+plt.savefig(f"{args.model}_par1/feat_importance_" + args.model + ".png", dpi=300, bbox_inches='tight')
+plt.savefig(f"{args.model}_par0/feat_importance_" + args.model + ".png", dpi=300, bbox_inches='tight')
 
 #for only one training
 # plt.barh(var_par, var_score_par0, color='teal')

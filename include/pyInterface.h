@@ -283,10 +283,26 @@ inline int ToPairType(int new_channel)
     static const std::map<int, int> channel_map = {
         {13, 1}, //etau
         {23, 0}, //mutau
-        {33, 2},//tautau
-        {11, -1},
-        {22, -1},
-        {12, -1}
+        {33, 2}, //tautau
+        {11, 4}, //ee
+        {22, 3}, //mumu
+        {12, 5} //emu
+    };
+    auto iter = channel_map.find(new_channel);
+    if(iter == channel_map.end())
+        throw std::runtime_error("Unknown channel ID");
+    return iter->second;
+}
+
+inline int ToChannelId(int new_channel)
+{
+    static const std::map<int, int> channel_map = {
+        {1, 0},
+        {0, 1},
+        {2, 2},
+        {3, 3},
+        {4, 4},
+        {5, 5}
     };
     auto iter = channel_map.find(new_channel);
     if(iter == channel_map.end())

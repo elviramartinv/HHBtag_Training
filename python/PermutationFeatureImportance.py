@@ -4,7 +4,7 @@
 import tensorflow as tf
 gpus = tf.config.experimental.list_physical_devices('GPU')
 tf.config.experimental.set_memory_growth(gpus[0], True)
-
+# TF_GPU_ALLOCATOR=cuda_malloc_async
 from tensorflow import keras
 from tensorflow.keras.callbacks import CSVLogger
 
@@ -138,4 +138,5 @@ plt.xticks(rotation=90)
 model_path = os.path.join(os.path.dirname(args.weights))
 
 plt.savefig(model_path + f"corr_matrix_par{args.parity}.png", dpi=300)
+print(f"Fig saved in {model_path + f'corr_matrix_par{args.parity}.png'}")
 
