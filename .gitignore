@@ -1,2 +1,7 @@
 __pycache__
 /output
+/python/model*
+/python/output*
+/scripts/*/*png
+/scripts/*/*pdf
+/scripts/*/*root
