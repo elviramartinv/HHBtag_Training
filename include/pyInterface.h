@@ -333,7 +333,8 @@ inline int ToEraId(int new_eraid)
         {5, 0},
         {6, 1},
         {7, 2},
-        {8, 3}
+        {8, 3},
+        {9, 4}
     };
     auto iter = era_map.find(new_eraid);
     if(iter == era_map.end())

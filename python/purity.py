@@ -10,7 +10,7 @@ import uproot
 
 from statsmodels.stats.proportion import proportion_confint
 
-from Apply import ApplyTraining
+from Apply_2024 import ApplyTraining
 
 # ggf and VBF res
 # masses = [250, 260, 270, 280, 300, 320, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 900, 1000, 1250, 1500, 2000, 2500, 3000]
@@ -26,22 +26,23 @@ from Apply import ApplyTraining
 #           '2022EE_GluGlutoHHto2B2Tau_SM', '2022EE_GluGlutoHHto2B2Tau_box', '2022EE_GluGlutoHHto2B2Tau_6', '2022EE_GluGlutoHHto2B2Tau_7', '2022EE_VBFHHto2B2Tau_SM', '2022EE_VBFHHto2B2Tau_1',
 #           '2023_GluGlutoHHto2B2Tau_SM', '2023_GluGlutoHHto2B2Tau_box', '2023_GluGlutoHHto2B2Tau_6', '2023_GluGlutoHHto2B2Tau_7', '2023_VBFHHto2B2Tau_SM', '2023_VBFHHto2B2Tau_1',
 #           '2023BPix_GluGlutoHHto2B2Tau_SM', '2023BPix_GluGlutoHHto2B2Tau_box', '2023BPix_GluGlutoHHto2B2Tau_6', '2023BPix_GluGlutoHHto2B2Tau_7', '2023BPix_VBFHHto2B2Tau_SM', '2023BPix_VBFHHto2B2Tau_1']
-masses = ['2022_GluGlutoHHto2B2Tau_SM', '2022_GluGlutoHHto2B2Tau_box', '2022_GluGlutoHHto2B2Tau_6', '2022_GluGlutoHHto2B2Tau_7', '2022_VBFtoHH2B2Tau_SM', '2022_VBFtoHH2B2Tau_1']
+# masses = ['2022_GluGlutoHHto2B2Tau_SM', '2022_GluGlutoHHto2B2Tau_box', '2022_GluGlutoHHto2B2Tau_6', '2022_GluGlutoHHto2B2Tau_7', '2022_VBFtoHH2B2Tau_SM', '2022_VBFtoHH2B2Tau_1']
+masses = ['2024_GGHH_0', '2024_GGHH_6', '2024_GGHH_7', '2024_GGHH_13', '2024_GGHH_14', '2024_GGHH_15', '2024_GGHH_16', '2024_GGHH_17', '2024_GGHH_18']
 # masses = ['2022EE_GluGlutoHHto2B2Tau_SM', '2022EE_GluGlutoHHto2B2Tau_box', '2022EE_GluGlutoHHto2B2Tau_6', '2022EE_GluGlutoHHto2B2Tau_7', '2022EE_VBFHHto2B2Tau_SM', '2022EE_VBFHHto2B2Tau_1']
 # masses = ['2023_GluGlutoHHto2B2Tau_SM', '2023_GluGlutoHHto2B2Tau_box', '2023_GluGlutoHHto2B2Tau_6', '2023_GluGlutoHHto2B2Tau_7', '2023_VBFHHto2B2Tau_SM', '2023_VBFHHto2B2Tau_1']
 # masses = ['2023BPix_GluGlutoHHto2B2Tau_SM', '2023BPix_GluGlutoHHto2B2Tau_box', '2023BPix_GluGlutoHHto2B2Tau_6', '2023BPix_GluGlutoHHto2B2Tau_7', '2023BPix_VBFHHto2B2Tau_SM', '2023BPix_VBFHHto2B2Tau_1']
 #VBF non res
 
-
 # path = "/afs/cern.ch/user/e/emartinv/public/Ntuple_prod/training_ntuples/GluGluToBulkGravitonToHHTo2B2Tau_M-"
 # path = "/afs/cern.ch/user/e/emartinv/public/Ntuple_prod/training_ntuples/GluGluToRadionToHHTo2B2Tau_M-"
 # path = "/afs/cern.ch/user/e/emartinv/public/Ntuple_prod/training_ntuples/VBFToBulkGravitonToHHTo2B2Tau_M-"
 # path = "/afs/cern.ch/user/e/emartinv/public/Ntuple_prod/training_ntuples/VBFToRadionToHHTo2B2Tau_M-"
-path = "/eos/user/e/emartinv/HHBtag_Training/training_skims_Run3_0109/" 
+# path = "/eos/user/e/emartinv/HHBtag_Training/training_skims_Run3_0109/"
+path = "/eos/user/e/emartinv/HHBtag_Training/training_skims_2024_PNet/" 
 # path = "/afs/cern.ch/user/e/emartinv/public/hhbtag_skims_fw/output_v2/"
 
-# taggers = ["btagPNetB", "btagRobustParTAK4B", "btagDeepFlavB"]
-taggers = ["btagPNetB"]
+# taggers = ["btagPNetB", "btagUParTAK4B", "btagDeepFlavB"]
+taggers = ["btagUParTAK4B"]
 results = {}
 results_hhbtag = {}
 error_results_hhbtag = {}
@@ -75,7 +76,8 @@ for mass in masses:
         error_results_hhbtag[parity] = {}
         # weights = f'model_PNet_2910_par{abs(parity-1)}/model'
         # weights = f'model_v2.0_par{abs(parity-1)}/model'
-        weights = f'HHBTag_PNet_trueb_0309_par{abs(parity-1)}/model'
+        weights = f'model_v3.2_HHBTag_PNet_trueb_0309_par{abs(parity-1)}/model'
+        # weights = f'model_2024year_1809_par{abs(parity-1)}/model'
         df = ROOT.RDataFrame("Event", file)
         # df = df.Filter("RecoJet_pt.size()>=2")
         # df = df.Filter('channel == 0 || channel == 1 || channel == 2')
@@ -188,7 +190,7 @@ for mass in masses:
     results[mass] = file_results
     # print("results", results[mass])
 
-with open("output/Run3_purities/json/HHBTag_v3.0109_2022.json", "w") as json_file:
+with open("output/Run3_purities/json/2024_v3.2.json", "w") as json_file:
     json.dump(results, json_file)
 
 raise RuntimeError("stop")
@@ -229,13 +231,13 @@ plt.xticks(xtick_locations, masses, rotation=45)
 
 plt.xlabel('signal sample', fontsize=14)
 plt.ylabel('Purity', fontsize=14)
-plt.title('2022preEE', fontsize=14)
+plt.title('2024', fontsize=14)
 plt.legend()
 # plt.grid()
 plt.tight_layout()
 
-plt.savefig('output/Run3_purities/2910_2022.pdf')
-plt.savefig('output/Run3_purities/2910_2022.png', dpi=300)
+plt.savefig('output/Run3_purities/2024_1809.pdf')
+plt.savefig('output/Run3_purities/2024_1809.png', dpi=300)
 
 
 #plt.show()

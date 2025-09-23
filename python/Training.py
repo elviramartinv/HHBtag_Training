@@ -23,7 +23,7 @@ import numpy as np
 
 import InputsProducer as InputsProducer
 import ParametrizedModel as pm
-from CalculateWeigths_VBF import CreateSampleWeigts, CrossCheckWeights
+from CalculateWeigths import CreateSampleWeigts, CrossCheckWeights
 import ROOT
 import gc
 
