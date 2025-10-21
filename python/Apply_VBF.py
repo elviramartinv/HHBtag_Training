@@ -18,7 +18,7 @@ import tensorflow as tf
 import argparse
 import json
 
-import InputsProducer_VBF as InputsProducer
+import InputsProducer_VBF_v5_PNet as InputsProducer
 import ParametrizedModel as pm
 
 class ApplyTraining:
@@ -64,8 +64,8 @@ if __name__ == "__main__":
     base_dir = os.path.dirname(file_dir)
 
     cfg_dir = os.path.join(base_dir, 'config')
-    applier = ApplyTraining(args.params_json, os.path.join(cfg_dir, 'mean_std_red.json'),
-                            os.path.join(cfg_dir, 'min_max_red_vbf.json'), args.training_variables)
+    applier = ApplyTraining(args.params_json, os.path.join(cfg_dir, 'mean_std_red_VBF_2j.json'),
+                            os.path.join(cfg_dir, 'min_max_red_vbf_2.json'), args.training_variables)
     pred, Y, evt, cpp_scores = applier.apply(args.file[0], args.weights, args.parity)
     #np.save(args.output, pred)
 

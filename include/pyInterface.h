@@ -230,6 +230,30 @@ ROOT::VecOps::RVec<size_t> CreateOrderedIndex (const ROOT::VecOps::RVec<LorentzV
     return ordered_index;
 }
 
+// Create ordered indices by absolute delta eta between htt_p4 and jets
+ROOT::VecOps::RVec<size_t> CreateOrderedIndexByDeltaEta_fromCols(const ROOT::VecOps::RVec<float>& pts,
+                                                                  const ROOT::VecOps::RVec<float>& etas,
+                                                                  const ROOT::VecOps::RVec<float>& phis,
+                                                                  const ROOT::VecOps::RVec<float>& masses,
+                                                                  const LorentzVectorM& htt_p4,
+                                                                  size_t max_jet = std::numeric_limits<size_t>::max())
+{
+    ROOT::VecOps::RVec<LorentzVectorE> jets_p4;
+    jets_p4.reserve(pts.size());
+    for(size_t i=0;i<pts.size();++i){
+        jets_p4.emplace_back(pts.at(i), etas.at(i), phis.at(i), masses.at(i));
+    }
+    ROOT::VecOps::RVec<size_t> ordered_index;
+    for(size_t i=0;i<jets_p4.size();++i) ordered_index.push_back(i);
+    std::sort(ordered_index.begin(), ordered_index.end(), [&](size_t a, size_t b){
+        double da = std::abs(htt_p4.eta() - jets_p4.at(a).eta());
+        double db = std::abs(htt_p4.eta() - jets_p4.at(b).eta());
+        return da > db; // descending: largest delta eta first
+    });
+    if(ordered_index.size() > max_jet) ordered_index.resize(max_jet);
+    return ordered_index;
+}
+
 float httDeltaPhi_jet (const LorentzVectorM& htt_p4,const ROOT::VecOps::RVec<size_t>& df_index,
                        const ROOT::VecOps::RVec<LorentzVectorE>& jets_p4, const size_t n)
 {
