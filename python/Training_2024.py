@@ -78,7 +78,7 @@ def PerformTraining(file_name, n_epoch, params):
     base_dir = os.path.dirname(file_dir)
     cfg_dir = os.path.join(base_dir, 'config')
 
-    model = pm.HHModel(var_pos, os.path.join(cfg_dir, 'mean_std_red.json'),
+    model = pm.HHModel(var_pos, os.path.join(cfg_dir, 'mean_std_red_2024.json'),
                        os.path.join(cfg_dir, 'min_max_red_2024.json'), params)
     model.call(X[0:1,:,:])
     opt = getattr(tf.keras.optimizers, params['optimizers'])(learning_rate=10 ** params['learning_rate_exp'], weight_decay=10 ** params['weight_decay_exp'])

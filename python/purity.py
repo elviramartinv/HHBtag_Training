@@ -27,7 +27,9 @@ from Apply_2024 import ApplyTraining
 #           '2023_GluGlutoHHto2B2Tau_SM', '2023_GluGlutoHHto2B2Tau_box', '2023_GluGlutoHHto2B2Tau_6', '2023_GluGlutoHHto2B2Tau_7', '2023_VBFHHto2B2Tau_SM', '2023_VBFHHto2B2Tau_1',
 #           '2023BPix_GluGlutoHHto2B2Tau_SM', '2023BPix_GluGlutoHHto2B2Tau_box', '2023BPix_GluGlutoHHto2B2Tau_6', '2023BPix_GluGlutoHHto2B2Tau_7', '2023BPix_VBFHHto2B2Tau_SM', '2023BPix_VBFHHto2B2Tau_1']
 # masses = ['2022_GluGlutoHHto2B2Tau_SM', '2022_GluGlutoHHto2B2Tau_box', '2022_GluGlutoHHto2B2Tau_6', '2022_GluGlutoHHto2B2Tau_7', '2022_VBFtoHH2B2Tau_SM', '2022_VBFtoHH2B2Tau_1']
-masses = ['2024_GGHH_0', '2024_GGHH_6', '2024_GGHH_7', '2024_GGHH_13', '2024_GGHH_14', '2024_GGHH_15', '2024_GGHH_16', '2024_GGHH_17', '2024_GGHH_18']
+masses = ['2024_ggHHto2B2Tau_0', '2024_ggHHto2B2Tau_13', '2024_ggHHto2B2Tau_14', '2024_ggHHto2B2Tau_15', '2024_ggHHto2B2Tau_16', '2024_ggHHto2B2Tau_17', '2024_ggHHto2B2Tau_18',
+          '2024_ggHHto2B2Tau_6', '2024_ggHHto2B2Tau_7',
+          '2024_VBFHHto2B2Tau_0', '2024_VBFHHto2B2Tau_1', '2024_VBFHHto2B2Tau_2', '2024_VBFHHto2B2Tau_3', '2024_VBFHHto2B2Tau_4', '2024_VBFHHto2B2Tau_5', '2024_VBFHHto2B2Tau_6', '2024_VBFHHto2B2Tau_7', '2024_VBFHHto2B2Tau_8', '2024_VBFHHto2B2Tau_9']
 # masses = ['2022EE_GluGlutoHHto2B2Tau_SM', '2022EE_GluGlutoHHto2B2Tau_box', '2022EE_GluGlutoHHto2B2Tau_6', '2022EE_GluGlutoHHto2B2Tau_7', '2022EE_VBFHHto2B2Tau_SM', '2022EE_VBFHHto2B2Tau_1']
 # masses = ['2023_GluGlutoHHto2B2Tau_SM', '2023_GluGlutoHHto2B2Tau_box', '2023_GluGlutoHHto2B2Tau_6', '2023_GluGlutoHHto2B2Tau_7', '2023_VBFHHto2B2Tau_SM', '2023_VBFHHto2B2Tau_1']
 # masses = ['2023BPix_GluGlutoHHto2B2Tau_SM', '2023BPix_GluGlutoHHto2B2Tau_box', '2023BPix_GluGlutoHHto2B2Tau_6', '2023BPix_GluGlutoHHto2B2Tau_7', '2023BPix_VBFHHto2B2Tau_SM', '2023BPix_VBFHHto2B2Tau_1']
@@ -38,7 +40,7 @@ masses = ['2024_GGHH_0', '2024_GGHH_6', '2024_GGHH_7', '2024_GGHH_13', '2024_GGH
 # path = "/afs/cern.ch/user/e/emartinv/public/Ntuple_prod/training_ntuples/VBFToBulkGravitonToHHTo2B2Tau_M-"
 # path = "/afs/cern.ch/user/e/emartinv/public/Ntuple_prod/training_ntuples/VBFToRadionToHHTo2B2Tau_M-"
 # path = "/eos/user/e/emartinv/HHBtag_Training/training_skims_Run3_0109/"
-path = "/eos/user/e/emartinv/HHBtag_Training/training_skims_2024_PNet/" 
+path = "/eos/user/e/emartinv/HHBtag_Training/training_skims_Run3_2024_2110_PNet/" 
 # path = "/afs/cern.ch/user/e/emartinv/public/hhbtag_skims_fw/output_v2/"
 
 # taggers = ["btagPNetB", "btagUParTAK4B", "btagDeepFlavB"]
@@ -77,7 +79,7 @@ for mass in masses:
         # weights = f'model_PNet_2910_par{abs(parity-1)}/model'
         # weights = f'model_v2.0_par{abs(parity-1)}/model'
         weights = f'model_v3.2_HHBTag_PNet_trueb_0309_par{abs(parity-1)}/model'
-        # weights = f'model_2024year_1809_par{abs(parity-1)}/model'
+        # weights = f'HHBTag_2024_2110_par{abs(parity-1)}/model'
         df = ROOT.RDataFrame("Event", file)
         # df = df.Filter("RecoJet_pt.size()>=2")
         # df = df.Filter('channel == 0 || channel == 1 || channel == 2')
@@ -190,7 +192,7 @@ for mass in masses:
     results[mass] = file_results
     # print("results", results[mass])
 
-with open("output/Run3_purities/json/2024_v3.2.json", "w") as json_file:
+with open("output/Run3_purities/json/v3.2_over_2024.json", "w") as json_file:
     json.dump(results, json_file)
 
 raise RuntimeError("stop")
@@ -236,8 +238,8 @@ plt.legend()
 # plt.grid()
 plt.tight_layout()
 
-plt.savefig('output/Run3_purities/2024_1809.pdf')
-plt.savefig('output/Run3_purities/2024_1809.png', dpi=300)
+plt.savefig('output/Run3_purities/2024_2110.pdf')
+plt.savefig('output/Run3_purities/2024_2110.png', dpi=300)
 
 
 #plt.show()

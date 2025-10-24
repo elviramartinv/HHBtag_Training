@@ -12,9 +12,9 @@ import numpy as np
 #     Robust_json = json.load(f)
 # with open('output/Run3_purities/json/HHBTag_v2.0_2023BPix.json') as f:
 #     v2_json = json.load(f)
-with open('output/Run3_purities/json/2024_1809.json') as f:
+with open('output/Run3_purities/json/2024_2110.json') as f:
     model2024_json = json.load(f)
-with open('output/Run3_purities/json/2024_v3p2.json') as f:
+with open('output/Run3_purities/json/v3p2_over_2024.json') as f:
     v3p2on2024_json = json.load(f)
 
 # Extrae los datos de newHHBtag para cada año
@@ -36,9 +36,13 @@ v3p2on2024 = [v['newHHBtag'] for k, v in v3p2on2024_json.items()]
 v3p2on2024_err = [v['newHHBtag_err'] for k, v in v3p2on2024_json.items()]
 
 # x_labels = ['ggF SM', 'ggF 0-1-0', 'ggF 2.45-1-0', 'ggF 5-1-0', 'VBF SM', 'VBF 1-0-1']
-x_labels = ['SM (0)', '2p45-1-0 (6)', '5-1-0 (7)', '0-1-0 (13)', '0-1-1 (14)', '1-1-0p1 (15)', '1-1-p35 (16)', '1-1-3 (17)', '1-1-m2 (18)']
-points = [k for k in model2024_json.keys()]
+# x_labels = ['SM (0)', '2p45-1-0 (6)', '5-1-0 (7)', '0-1-0 (13)', '0-1-1 (14)', '1-1-0p1 (15)', '1-1-p35 (16)', '1-1-3 (17)', '1-1-m2 (18)']
+x_labels = ['ggF SM', 'ggF 2p45-1-0', 'ggF 5-1-0', 'ggF 0-1-0', 'ggF 0-1-1', 'ggF 1-1-0p1', 'ggF 1-1-p35', 'ggF 1-1-3', 'ggF 1-1-m2',
+            'VBF SM', 'VBF 1-0-1', 'VBF 1p74-1p37-14.4', 'VBF m0p012-0p030-10.3', 'VBF m0p758-1p44-m19.3', 'VBF m0p962-0p959-m1p43', 'VBF m1p21-1p94-m0p94', 'VBF m1p60-2p72-m1p36', 'VBF m1p83-3p57-m3p39', 'VBF 2p12-3p87-5p96']
 
+
+# points =
+points = [k for k in model2024_json.keys()]
 
 # deepFlav_err = np.array(deepFlav_err).T
 # PNet_err = np.array(PNet_err).T
@@ -66,7 +70,7 @@ plt.xlabel('Signal sample', fontsize=14)
 plt.ylabel('Purity', fontsize=14)
 plt.title('2024')
 plt.legend(fontsize=14, ncol=2)
-plt.savefig('output/Run3_purities/2024_v3p2comparison.pdf')
-plt.savefig('output/Run3_purities/2024_v3p2comparison.png', dpi=300)
+plt.savefig('output/Run3_purities/2024v2_v3p2comparison.pdf')
+plt.savefig('output/Run3_purities/2024v2_v3p2comparison.png', dpi=300)
 
 #plt.savefig('newHHBtag.png', dpi=300)
