@@ -17,7 +17,7 @@ import argparse
 import json
 import numpy as np
 
-import InputsProducer_VBF_v5_PNet as InputsProducer
+import InputsProducer_VBF_v5 as InputsProducer
 import ParametrizedModel as pm
 from CalculateWeigths_VBF import CreateSampleWeigts, CrossCheckWeights
 import ROOT
@@ -72,7 +72,7 @@ def PerformTraining(file_name, n_epoch, params):
     cfg_dir = os.path.join(base_dir, 'config')
 
     model = pm.HHModel(var_pos, os.path.join(cfg_dir, 'mean_std_red_VBF_2j.json'),
-                       os.path.join(cfg_dir, 'min_max_red_vbf_v2.json'), params)
+                       os.path.join(cfg_dir, 'min_max_red_vbf.json'), params)
     model.call(X[0:1,:,:])
     opt = getattr(tf.keras.optimizers, params['optimizers'])(lr=10 ** params['learning_rate_exp'], weight_decay=10 ** params['weight_decay_exp'])
     # opt = getattr(tf.keras.optimizers, params['optimizers'])(lr=10 ** params['learning_rate_exp'])
